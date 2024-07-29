@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<language>
+  <page id="5554401" title="UT Console" descr="Strings for use in the Console - do not translate commands for sonsistency!" voice="no">
+    <t id="1">&amp;</t><!-- Prefix for all Commands - / is not suitable since its used internally by the game.-->
+    <!-- t id 2 to 99 is reserved for general help/manual stuff -->
+    <t id="2">{5554401,1}help</t>
+    <t id="3">Currently available Commands and their Params: (pass \033Wh\033X or \033Whelp\033X to a command to get further usage info)\n\033W'+{5554401,1}+'info $object\033X Prints Info about the Object\n\033W'+{5554401,1}+'destroy $object\033X Destroys targeted Object after confirmation\n\nAlso see \033W'+{5554401,1}+'help target\033X for info on targeting objects.</t>
+    <t id="4">{5554401,2} target</t>
+    <t id="5">Targeting Objects - insert this in place of an $object placeholder (not all method implemented yet, but planned)\n\033WABC-123\033X Targeting via an Objects IDcode - It is not uique, so use careful cause it might target an unintended object - WiP\n\033W0x1234abcd\033X Targeting via an Objects unique identifier (usually printed in the Log) - technically any number is fine (WiP)\n\033Wptarget\033X current Player Target\n\033Wgtarget\033X current guidance target (NOT the active mission Target)\n\033Watarget\033X the current destination of the Autopilot, if active\n\033Wpcontainer\033X The Object the Player is currently on (Ship or Station)\n\nhtargets,mapobjects not yet implemented</t>
+    
+    <!-- t id 100 upwards is for Console commands, where the 100 place is the sequential command number, tens are the sub-commands, and even numbers are the commands, the following odd number is their respective help entry -->
+    <!-- working on this -->
+  </page>
+</language>

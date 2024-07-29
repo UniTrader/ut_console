@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet type="text/xsl" href="../../content.xsl"?>
+<content id="ut_console" name="UniTraders Console Mod" description="Adding Console-like functionality to the Chatwindow. Goal is to be independent of any other mods and not interfere with existing games more than the user intends." author="UniTrader" date="2024-07-16" version="001" save="false" uninstaller="false" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://utnas/~unitrader/XRebirthxsds/content.xsd">
+ <dependency id="kuerteeUIExtensionsAndHUD" name="kuertee UI Extensions and HUD" optional="true" url="https://www.nexusmods.com/x4foundations/mods/552"/>
+</content>
