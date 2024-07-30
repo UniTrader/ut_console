@@ -2052,88 +2052,88 @@ attribute	name	set_object_velocity
             </do_elseif>
 --> 
             <!-- root "Properties" - no predecessor property (predecessor just ignored for now; planned for special handling) -->
-            <do_elseif value="$Property == 'loot_magnet'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'loot_magnet'"><!-- ficticious property -->
               <set_loot_magnet active="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'player_activity'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'player_activity'"><!-- ficticious property -->
               <set_player_activity activity="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'player_position'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'player_position'"><!-- ficticious property -->
               <set_player_entity_position>
                 <position value="$SaveValue"/>
                 <rotation value="$SaveValue2"/>
               </set_player_entity_position>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'player_persistent_docking_request'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'player_persistent_docking_request'"><!-- ficticious property -->
               <set_player_persistent_docking_request persistent="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'emergency_eject_active'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'emergency_eject_active'"><!-- ficticious property -->
               <set_emergency_eject_active active="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'timewarp_factor'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'timewarp_factor'"><!-- ficticious property -->
               <set_timewarp_factor factor="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'playership_throttle'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'playership_throttle'"><!-- ficticious property -->
               <set_playership_throttle value="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'control_mode_messages_disabled'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'control_mode_messages_disabled'"><!-- ficticious property -->
               <set_control_mode_messages_disabled />
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'adaptive_steering_forced'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'adaptive_steering_forced'"><!-- ficticious property -->
               <set_adaptive_steering_forced />
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'ambient_volume'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'ambient_volume'"><!-- ficticious property -->
               <set_ambient_volume volume="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'effect_volume'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'effect_volume'"><!-- ficticious property -->
               <set_effect_volume volume="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'music_volume'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'music_volume'"><!-- ficticious property -->
               <set_music_volume volume="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'holomap_zoom'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'holomap_zoom'"><!-- ficticious property -->
               <set_holomap_zoom value="$SaveValue" instant="$SaveValue2"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'holomap_max_zoom'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'holomap_max_zoom'"><!-- ficticious property -->
               <set_holomap_max_zoom value="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'player_target'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'player_target'"><!-- ficticious property -->
               <set_player_target object="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'player_firstperson_override'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'player_firstperson_override'"><!-- ficticious property -->
               <set_player_firstperson_override id="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'active_mission_waypoint_known'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'active_mission_waypoint_known'"><!-- ficticious property -->
               <set_active_mission_waypoint_known/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'set_external_view_allowed'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'set_external_view_allowed'"><!-- ficticious property -->
               <set_external_view_allowed allow="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'set_notification_type_enabled'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'set_notification_type_enabled'"><!-- ficticious property -->
               <set_notification_type_enabled type="$SaveValue" enabled="$SaveValue2"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
             
             <!-- regular properties -->
-            <do_elseif value="$Property == 'name'">
+            <do_elseif value="$Property" exact="'name'">
               <do_if value="typeof $PropertyValue == datatype.faction">
                 <set_faction_identity faction="$PropertyValue"  name="$SaveValue"/>
               </do_if>
@@ -2141,7 +2141,7 @@ attribute	name	set_object_velocity
                 <set_object_name object="$PropertyValue" name="$SaveValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'description'">
+            <do_elseif value="$Property" exact="'description'">
               <do_if value="typeof $PropertyValue == datatype.faction">
                 <set_faction_identity faction="$PropertyValue" description="$SaveValue"/>
               </do_if>
@@ -2154,7 +2154,7 @@ attribute	name	set_object_velocity
                 </do_else>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'alertlevel'">
+            <do_elseif value="$Property" exact="'alertlevel'">
               <do_if value="$SaveValue == alertlevel.low or $SaveValue == 'low' or $SaveValue == 'green'">
                 <set_alert_level object="$PropertyValue" level="green"/>
               </do_if>
@@ -2165,14 +2165,14 @@ attribute	name	set_object_velocity
                 <set_alert_level object="$PropertyValue" level="red"/>
               </do_elseif>
             </do_elseif>
-            <do_elseif value="$Property == 'ammo.macro'"><!-- . in property !! Handling needed earlier!! -->
+            <do_elseif value="$Property" exact="'ammo.macro'"><!-- . in property !! Handling needed earlier!! -->
               <set_ammo object="$PropertyValue" macro="$SaveValue" amount="$SaveValue2"/>
             </do_elseif>
-            <do_elseif value="$Property == 'bonusunlocktime'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'bonusunlocktime'"><!-- ficticious property -->
               <set_next_bonus_unlocktime object="$PropertyValue" bonus="$SaveValue" time="$SaveValue2"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'identity'"><!-- ficticious property --><!-- ToDo: move to direct sub-expressions like $faction.name , $faction.shortname etc. for consistency -->
+            <do_elseif value="$Property" exact="'identity'"><!-- ficticious property --><!-- ToDo: move to direct sub-expressions like $faction.name , $faction.shortname etc. for consistency -->
               <do_if value="$SaveValue.$name?"><!-- done -->
                 <set_faction_identity faction="$PropertyValue" name="$SaveValue.$name"/>
               </do_if>
@@ -2202,7 +2202,7 @@ attribute	name	set_object_velocity
               </do_if>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'mood'">
+            <do_elseif value="$Property" exact="'mood'">
               <do_if value="$SaveValue == 'aggression'">
                 <do_if value="$SaveValue2">
                   <set_faction_mood faction="$PropertyValue" type="aggression" level="$SaveValue2"/>
@@ -2220,7 +2220,7 @@ attribute	name	set_object_velocity
                 </do_else>
               </do_if>
             </do_elseif>
-            <do_elseif value="$Property == 'active'">
+            <do_elseif value="$Property" exact="'active'">
               <do_if value="typeof $PropertyValue == datatype.faction">
                 <set_faction_active faction="$PropertyValue" active="$SaveValue"/>
               </do_if>
@@ -2233,7 +2233,7 @@ attribute	name	set_object_velocity
                 </do_else>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'known'">
+            <do_elseif value="$Property" exact="'known'">
               <do_if value="typeof $PropertyValue == datatype.faction">
                 <set_faction_known faction="$PropertyValue" known="$SaveValue"/>
               </do_if>
@@ -2241,10 +2241,10 @@ attribute	name	set_object_velocity
                 <set_known object="$PropertyValue" known="$SaveValue" updatesnapshot="$SaveValue2"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'policefaction'">
+            <do_elseif value="$Property" exact="'policefaction'">
               <set_faction_police faction="$PropertyValue" policefaction="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'headquarters'">
+            <do_elseif value="$Property" exact="'headquarters'">
               <do_if value="$SaveValue2?">
                 <set_faction_headquarters faction="$PropertyValue" station="$SaveValue"/>
               </do_if>
@@ -2252,34 +2252,34 @@ attribute	name	set_object_velocity
                 <set_faction_headquarters faction="$PropertyValue" station="$SaveValue" headquarters="$SaveValue2"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'isnpcassignmentrestricted'">
+            <do_elseif value="$Property" exact="'isnpcassignmentrestricted'">
               <set_object_npc_assignment_restricted object="$PropertyValue" restricted="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'jobmainzone'">
+            <do_elseif value="$Property" exact="'jobmainzone'">
               <set_job_ship_mainzone ship="$PropertyValue" zone="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'jobmainsector'">
+            <do_elseif value="$Property" exact="'jobmainsector'">
               <set_job_ship_mainsector ship="$PropertyValue" sector="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'expirationtime'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'expirationtime'"><!-- ficticious property -->
               <set_ship_expiration_time ship="$PropertyValue" time="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'safeposallowed'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'safeposallowed'"><!-- ficticious property -->
               <set_ship_safepos_allowed ship="$PropertyValue" allow="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'loadoutlevel'">
+            <do_elseif value="$Property" exact="'loadoutlevel'">
               <set_loadout_level object="$PropertyValue" exact="$SaveValue"/>
             </do_elseif>
-            <!--do_elseif value="$Property == 'isprivate'">none of the attributes 'interior', 'room' or 'corridor' is present!
+            <!--do_elseif value="$Property" exact="'isprivate'">none of the attributes 'interior', 'room' or 'corridor' is present!
               <set_dynamic_interior_private object="$PropertyValue" private="$SaveValue"/>
             </do_elseif-->
-            <!--do_elseif value="$Property == 'ispersistent'"><!- - ficticious property - -> none of the attributes 'interior', 'room' or 'corridor' is present!
+            <!--do_elseif value="$Property" exact="'ispersistent'"><!- - ficticious property - -> none of the attributes 'interior', 'room' or 'corridor' is present!
               <set_dynamic_interior_persistent object="$PropertyValue" persistent="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif-->
-            <do_elseif value="$Property == 'persistent'"><!-- ficticious property (not, see prev) --><!-- for masstraffic, drops, regionobjects,wrecks, presentation clusters -->
+            <do_elseif value="$Property" exact="'persistent'"><!-- ficticious property (not, see prev) --><!-- for masstraffic, drops, regionobjects,wrecks, presentation clusters -->
               <do_if value="$PropertyValue.ismasstraffic">
                 <do_if value="$SaveValue">
                   <set_mass_traffic_object_persistence object="$PropertyValue" persistent="true"/>
@@ -2322,21 +2322,21 @@ attribute	name	set_object_velocity
               </do_else>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'drones_armed'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'drones_armed'"><!-- ficticious property -->
               <set_drone_armed object="$PropertyValue" category="$SaveValue" armed="$SaveValue2"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'dronemode'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'dronemode'"><!-- ficticious property -->
               <set_drone_mode object="$PropertyValue" category="$SaveValue" mode="$SaveValue2"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'maxbudget'">
+            <do_elseif value="$Property" exact="'maxbudget'">
               <set_object_max_budget object="$PropertyValue" amount="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'minbudget'">
+            <do_elseif value="$Property" exact="'minbudget'">
               <set_object_min_budget object="$PropertyValue" amount="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'roomslot'">
+            <do_elseif value="$Property" exact="'roomslot'">
               <do_if value="$SaveValue">
                 <set_actor_roomslot actor="$PropertyValue" roomslot="$SaveValue"/>
               </do_if>
@@ -2344,7 +2344,7 @@ attribute	name	set_object_velocity
                 <clear_actor_roomslot actor="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'currentchair'">
+            <do_elseif value="$Property" exact="'currentchair'">
               <do_if value="$SaveValue">
                 <set_actor_current_chair actor="$PropertyValue" roomslot="$SaveValue"/>
               </do_if>
@@ -2352,7 +2352,7 @@ attribute	name	set_object_velocity
                 <clear_actor_current_chair actor="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'emotion'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'emotion'"><!-- ficticious property -->
               <do_if value="$SaveValue">
                 <set_actor_emotion actor="$PropertyValue" emotion="$SaveValue"/>
               </do_if>
@@ -2361,7 +2361,7 @@ attribute	name	set_object_velocity
               </do_else>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'lookat'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'lookat'"><!-- ficticious property -->
               <do_if value="$SaveValue">
                 <set_actor_lookat actor="$PropertyValue" component="$SaveValue"/>
               </do_if>
@@ -2370,7 +2370,7 @@ attribute	name	set_object_velocity
               </do_else>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'touch'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'touch'"><!-- ficticious property -->
               <do_if value="$SaveValue">
                 <do_if value="$SaveValue2">
                   <set_actor_touch actor="$PropertyValue" tags="$SaveValue" lefthand="true"/>
@@ -2384,7 +2384,7 @@ attribute	name	set_object_velocity
               </do_else>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'tool'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'tool'"><!-- ficticious property -->
               <do_if value="$SaveValue">
                 <do_if value="$SaveValue2">
                   <set_actor_tool actor="$PropertyValue" name="$SaveValue" lefthand="true"/>
@@ -2398,7 +2398,7 @@ attribute	name	set_object_velocity
               </do_else>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'buildprocessor' or $Property == 'buildanchor'"><!-- not sure what the difference is or which is correct in this context -->
+            <do_elseif value="$Property == 'buildprocessor' or $Property =='buildanchor'"><!-- not sure what the difference is or which is correct in this context -->
               <do_if value="$SaveValue">
                 <set_buildanchor object="$PropertyValue" buildprocessor="$SaveValue"/>
               </do_if>
@@ -2406,7 +2406,7 @@ attribute	name	set_object_velocity
                 <clear_buildanchor buildprocessor="$PropertyValue.buildanchor"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'isexclusiveforextensionjobs'"><!-- not sure if this is the right property, but is the closest one -->
+            <do_elseif value="$Property" exact="'isexclusiveforextensionjobs'"><!-- not sure if this is the right property, but is the closest one -->
               <do_if value="$SaveValue">
                 <set_space_job_exclusivity space="$PropertyValue" exclusive="$SaveValue"/>
               </do_if>
@@ -2414,7 +2414,7 @@ attribute	name	set_object_velocity
                 <reset_space_job_exclusivity space="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'god'">
+            <do_elseif value="$Property" exact="'god'">
               <do_if value="$SaveValue">
                 <set_space_god_allowed space="$PropertyValue" allow="$SaveValue"/>
               </do_if>
@@ -2422,7 +2422,7 @@ attribute	name	set_object_velocity
                 <reset_space_god_allowed space="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'factionlogic'">
+            <do_elseif value="$Property" exact="'factionlogic'">
               <do_if value="$SaveValue">
                 <set_space_faction_logic_allowed space="$PropertyValue" allow="$SaveValue"/>
               </do_if>
@@ -2430,7 +2430,7 @@ attribute	name	set_object_velocity
                 <reset_space_faction_logic_allowed space="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'jobs'">
+            <do_elseif value="$Property" exact="'jobs'">
               <do_if value="$SaveValue">
                 <set_space_jobs_allowed space="$PropertyValue" allow="$SaveValue"/>
               </do_if>
@@ -2438,7 +2438,7 @@ attribute	name	set_object_velocity
                 <reset_space_jobs_allowed space="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'economy'">
+            <do_elseif value="$Property" exact="'economy'">
               <do_if value="$SaveValue">
               <set_space_economy space="$PropertyValue" exact="$SaveValue"/>
               </do_if>
@@ -2446,7 +2446,7 @@ attribute	name	set_object_velocity
                 <reset_space_economy space="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'security'">
+            <do_elseif value="$Property" exact="'security'">
               <do_if value="$SaveValue">
                 <set_space_security space="$PropertyValue" exact="$SaveValue"/>
               </do_if>
@@ -2454,7 +2454,7 @@ attribute	name	set_object_velocity
                 <reset_space_security space="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'sunlight'">
+            <do_elseif value="$Property" exact="'sunlight'">
               <do_if value="$SaveValue">
                 <set_space_sunlight space="$PropertyValue" exact="$SaveValue"/>
               </do_if>
@@ -2462,7 +2462,7 @@ attribute	name	set_object_velocity
                 <reset_space_sunlight space="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'accesslicence'">
+            <do_elseif value="$Property" exact="'accesslicence'">
               <do_if value="$SaveValue == licence.capitalequipment or $SaveValue == 'capitalequipment'">
                 <set_object_access_licence object="$PropertyValue" licence="capitalequipment"/>
               </do_if>
@@ -2542,13 +2542,13 @@ attribute	name	set_object_velocity
                 <clear_object_access_licence object="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'iscapturable'">
+            <do_elseif value="$Property" exact="'iscapturable'">
               <set_object_capturable object="$PropertyValue" capturable="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'dockingenabled'">
+            <do_elseif value="$Property" exact="'dockingenabled'">
               <set_object_docking_enabled object="$PropertyValue" enabled="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'friendlist'">
+            <do_elseif value="$Property" exact="'friendlist'">
               <do_if value="$SaveValue">
                 <set_object_friend_list object="$PropertyValue" factions="$SaveValue"/>
               </do_if>
@@ -2559,7 +2559,7 @@ attribute	name	set_object_velocity
                 <remove_value name="$tmp"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'foelist'">
+            <do_elseif value="$Property" exact="'foelist'">
               <do_if value="$SaveValue">
                 <set_object_foe_list object="$PropertyValue" factions="$SaveValue"/>
               </do_if>
@@ -2570,18 +2570,18 @@ attribute	name	set_object_velocity
                 <remove_value name="$tmp"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'isradarvisible'">
+            <do_elseif value="$Property" exact="'isradarvisible'">
               <set_object_radar_visible object="$PropertyValue" visible="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'isforcedradarvisible'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'isforcedradarvisible'"><!-- ficticious property -->
               <set_object_forced_radar_visible object="$PropertyValue" visible="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'issellable'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'issellable'"><!-- ficticious property -->
               <set_object_sellable object="$PropertyValue" sellable="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'commander'">
+            <do_elseif value="$Property" exact="'commander'">
               <do_if value="$SaveValue" exact="null">
                 <remove_object_commander object="$PropertyValue"/>
               </do_if>
@@ -2595,57 +2595,57 @@ attribute	name	set_object_velocity
                 <set_object_commander object="$PropertyValue" commander="$SaveValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'minhull'">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'minhull set called for:' + $PropertyValue + '//' + $Property + '//' + $SaveValue"/>
+            <do_elseif value="$Property" exact="'minhull'"><!-- ficticious property -->
               <set_object_min_hull object="$PropertyValue" exact="$SaveValue"/>
+              <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'minshield'">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'minshield set called for:' + $PropertyValue + '//' + $Property + '//' + $SaveValue"/>
+            <do_elseif value="$Property" exact="'minshield'"><!-- ficticious property -->
               <set_object_min_shield object="$PropertyValue" exact="$SaveValue"/>
+              <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'hull'">
+            <do_elseif value="$Property" exact="'hull'">
               <set_object_hull object="$PropertyValue" exact="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'shield'">
+            <do_elseif value="$Property" exact="'shield'">
               <set_object_shield object="$PropertyValue" exact="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'fleet.name'"><!-- . in property !! Handling needed earlier!! -->
+            <do_elseif value="$Property" exact="'fleet.name'"><!-- . in property !! Handling needed earlier!! -->
               <set_object_fleet_name object="$PropertyValue" name="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'relationbehaviour'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'relationbehaviour'"><!-- ficticious property -->
               <set_object_relation_behaviour object="$PropertyValue" disable="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'signalresponse'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'signalresponse'"><!-- ficticious property -->
               <set_object_signal_response object="$PropertyValue" signal="$SaveValue" response="$SaveValue2"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'scanned'"><!-- ficticious property - doesnt include the scan level-->
+            <do_elseif value="$Property" exact="'scanned'"><!-- ficticious property - doesnt include the scan level-->
               <set_object_scanned object="$PropertyValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'scanned_long'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'scanned_long'"><!-- ficticious property -->
               <set_object_long_range_scanned object="$PropertyValue" scanned="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'ishackable'">
+            <do_elseif value="$Property" exact="'ishackable'">
               <set_object_hackable object="$PropertyValue" hackable="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'hidden'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'hidden'"><!-- ficticious property -->
               <set_object_hidden object="$PropertyValue" hidden="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'ishullunrepairable'">
+            <do_elseif value="$Property" exact="'ishullunrepairable'">
               <set_object_hull_unrepairable object="$PropertyValue" unrepairable="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'isshieldunrepairable'">
+            <do_elseif value="$Property" exact="'isshieldunrepairable'">
               <set_object_shield_unrepairable object="$PropertyValue" unrepairable="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'affected_by_force_effect'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'affected_by_force_effect'"><!-- ficticious property -->
               <set_object_affected_by_force_effect object="$PropertyValue" affected="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'islocked'"><!-- same property name for data vault and rooms -->
+            <do_elseif value="$Property" exact="'islocked'"><!-- same property name for data vault and rooms -->
               <do_if value="$PropertyValue.isclass.room">
                 <set_room_locked room="$PropertyValue" locked="$SaveValue"/>
               </do_if>
@@ -2653,13 +2653,13 @@ attribute	name	set_object_velocity
                 <set_object_unlock_state object="$PropertyValue" state="locked"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'ispartiallyunlocked'">
+            <do_elseif value="$Property" exact="'ispartiallyunlocked'">
               <set_object_unlock_state object="$PropertyValue" state="partial_unlock"/>
             </do_elseif>
-            <do_elseif value="$Property == 'isunlocked'">
+            <do_elseif value="$Property" exact="'isunlocked'">
               <set_object_unlock_state object="$PropertyValue" state="unlocked"/>
             </do_elseif>
-            <do_elseif value="$Property == 'dropallowed'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'dropallowed'"><!-- ficticious property -->
               <do_if value="$SaveValue and $SaveValue2">
                 <set_allow_drop object="$PropertyValue" allow="true" recursive="true"/>
               </do_if>
@@ -2674,16 +2674,16 @@ attribute	name	set_object_velocity
                 <set_allow_drop object="$PropertyValue" allow="false" recursive="false"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'drop'">
+            <do_elseif value="$Property" exact="'drop'">
               <set_drop_object object="$PropertyValue" drop="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'page'">
+            <do_elseif value="$Property" exact="'page'">
               <set_entity_page entity="$PropertyValue" page="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'type'">
+            <do_elseif value="$Property" exact="'type'">
               <set_entity_type entity="$PropertyValue" type="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'role'">
+            <do_elseif value="$Property" exact="'role'">
               <do_if value="$SaveValue">
                 <set_entity_role entity="$PropertyValue" role="$SaveValue"/>
               </do_if>
@@ -2691,7 +2691,7 @@ attribute	name	set_object_velocity
                 <clear_entity_role entity="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'templaterole'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'templaterole'"><!-- ficticious property -->
               <do_if value="$SaveValue">
               <set_npc_template_role object="$PropertyValue" role="$SaveValue" template="$SaveValue2"/>
               </do_if>
@@ -2700,7 +2700,7 @@ attribute	name	set_object_velocity
               </do_else>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'roleobject'">
+            <do_elseif value="$Property" exact="'roleobject'">
               <do_if value="$SaveValue">
                 <set_entity_role_object entity="$PropertyValue" object="$SaveValue"/>
               </do_if>
@@ -2708,25 +2708,25 @@ attribute	name	set_object_velocity
                 <clear_entity_role_object entity="$PropertyValue"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'relationto'">
+            <do_elseif value="$Property" exact="'relationto'">
               <set_faction_relation faction="$PropertyValue" otherfaction="$SaveValue" value="$SaveValue2"/>
             </do_elseif>
-            <do_elseif value="$Property == 'isrelationlocked'">
+            <do_elseif value="$Property" exact="'isrelationlocked'">
               <set_faction_relation_locked faction="$PropertyValue" locked="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'owner'">
+            <do_elseif value="$Property" exact="'owner'">
               <set_owner object="$PropertyValue" faction="$SaveValue" overridenpc="$SaveValue2"/>
             </do_elseif>
-            <do_elseif value="$Property == 'coverowner'">
+            <do_elseif value="$Property" exact="'coverowner'">
               <set_cover_owner object="$PropertyValue" faction="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'representative'">
+            <do_elseif value="$Property" exact="'representative'">
               <set_representative faction="$PropertyValue" representative="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'skill'"><!-- half-ficticious property - skillt type is a parameter here -->
+            <do_elseif value="$Property" exact="'skill'"><!-- half-ficticious property - skillt type is a parameter here -->
               <set_skill entity="$PropertyValue" type="$SaveValue" exact="$SaveValue2"/>
             </do_elseif>
-            <do_elseif value="$Property == 'tradeoffersenabled'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'tradeoffersenabled'"><!-- ficticious property -->
               <do_if value="$SaveValue">
                 <set_tradeoffers_enabled object="$PropertyValue" enabled="true"/>
               </do_if>
@@ -2735,24 +2735,24 @@ attribute	name	set_object_velocity
               </do_else>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'isarmed'"><!-- ficticious property for turrets; actually used on mines -->
+            <do_elseif value="$Property" exact="'isarmed'"><!-- ficticious property for turrets; actually used on mines -->
               <set_turrets_armed object="$PropertyValue" armed="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'experienceprogress'">
+            <do_elseif value="$Property" exact="'experienceprogress'">
               <set_experience_progress entity="$PropertyValue" exact="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'ency_visibility'"><!-- ficticious property -->
+            <do_elseif value="$Property" exact="'ency_visibility'"><!-- ficticious property -->
               <set_object_encyclopedia_visibility object="$PropertyValue" visible="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'oxygenpercentage'">
+            <do_elseif value="$Property" exact="'oxygenpercentage'">
               <set_spacesuit_oxygen object="$PropertyValue" percent="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'stock'"><!-- warelist, but for setting its an id i think -->
+            <do_elseif value="$Property" exact="'stock'"><!-- warelist, but for setting its an id i think -->
               <set_stock_reference entity="$PropertyValue" stock="$SaveValue"/>
             </do_elseif>
-            <do_elseif value="$Property == 'hasownaccount'"><!-- when disabling account it allows to transfer the remaining money to another object, or the faction acount (true)-->
+            <do_elseif value="$Property" exact="'hasownaccount'"><!-- when disabling account it allows to transfer the remaining money to another object, or the faction acount (true)-->
               <do_if value="$SaveValue">
                 <set_object_account object="$PropertyValue"/>
               </do_if>
@@ -2769,7 +2769,7 @@ attribute	name	set_object_velocity
                 </do_else>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'ispaused'"><!-- this is set for Modules, not Stations! proper way to retrieve modules needed first -->
+            <do_elseif value="$Property" exact="'ispaused'"><!-- this is set for Modules, not Stations! proper way to retrieve modules needed first -->
               <do_if value="$SaveValue">
                 <set_production_paused object="$PropertyValue" paused="true"/>
               </do_if>
@@ -2777,11 +2777,11 @@ attribute	name	set_object_velocity
                 <set_production_paused object="$PropertyValue" paused="false"/>
               </do_else>
             </do_elseif>
-            <do_elseif value="$Property == 'region_time_profile_source'"><!-- fictious property --><!-- current object i applied to region; other way might be more intuitive? -->
+            <do_elseif value="$Property" exact="'region_time_profile_source'"><!-- fictious property --><!-- current object i applied to region; other way might be more intuitive? -->
               <set_region_time_profile_source object="$PropertyValue" region="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'buildmethod'"><!-- fictious property --><!-- this is set for Modules, not Stations! proper way to retrieve modules needed first -->
+            <do_elseif value="$Property" exact="'buildmethod'"><!-- fictious property --><!-- this is set for Modules, not Stations! proper way to retrieve modules needed first -->
               <do_if value="$SaveValue== 'argon'">
                 <set_buildmethod_override object="$PropertyValue" method="argon"/>
               </do_if>
@@ -2811,7 +2811,7 @@ attribute	name	set_object_velocity
               </do_else>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
-            <do_elseif value="$Property == 'display_text'"><!-- fictious property -->
+            <do_elseif value="$Property" exact="'display_text'"><!-- fictious property -->
               <set_display_text object="$PropertyValue" text="$SaveValue"/>
               <set_value name="$FictiousProperty" exact="true"/>
             </do_elseif>
