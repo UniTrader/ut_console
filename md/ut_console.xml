@@ -122,8 +122,14 @@
             <signal_cue_instantly cue="ShowMarker" param="1"/>
             <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'readtext [h(elp)] pageid textid [ c(onsole) | p(opup) | s(peak) | l(ogbook) | d(ebugtext) ]\nOutput: printed to the specified place, or spoken by the Player. Falls back to Console output. Some might take additional input.'"/>
             <include_actions ref="PrintHelpAndUnpackTerms"/>
-            <set_value name="$pageid" exact="$terms_converted.{2}"/>
-            <set_value name="$textid" exact="$terms_converted.{3}"/>
+            <run_actions ref="EvaluatePropertyFromRoot" result="$pageid">
+              <param name="pchain" value="$terms_converted.{2}"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <run_actions ref="EvaluatePropertyFromRoot" result="$textid">
+              <param name="pchain" value="$terms_converted.{3}"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
             <do_if value="$terms.count == 2">
               <raise_lua_event name="'Chat_Window_API.Print'" param="'Seperate Page and Text/Line id with a Space!!!'"/>
             </do_if>
