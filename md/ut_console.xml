@@ -12,9 +12,10 @@
         <set_value name="$secretvalue" exact="'You will never see this!!!'"/>
         <set_value name="$debugmode" exact="false"/>
         <set_value name="$console_vars" exact="table[]"/>
-        <set_value name="$console_output_history" exact="[]"/>
-        <set_value name="$command_history" exact="[]"/>
-        <set_value name="$write_command_history" exact="[]"/>
+        <!-- aligned Lists: output stores the console output, type stores what kind of message it was for future filtering-->
+        <!-- possible values: command , command_hot , command_out debug_out -->
+        <set_value name="$console_history_output" exact="[]"/>
+        <set_value name="$console_history_type" exact="[]"/>
         <set_value name="$usage_stage" exact="0" comment="0 = never used(called), 1=read commands only, 2=safe writes/actions only, 3=anything"/>
       </actions>
       <cues>
@@ -269,6 +270,71 @@
             <do_else>
               <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - failure, result is actually %s'.[$SetValue,$SetProperty,$GetValue,$Get2Value,$FinalValue]"/>
             </do_else>
+          </actions>
+        </cue>
+        <cue name="PerformAction" instantiate="true" namespace="this">
+          <conditions><!-- ALL IMPLEMENTED COMMANDS MUST BE LISTED IN HERE!!! -->
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_any>
+              <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'warp'"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <signal_cue_instantly cue="ShowMarker" param="2"/>
+            <!-- first make sure a command with the defined prefix was entered -->
+            <set_value name="$command" exact="event.param3.$terms.{1}"/>
+            <substitute_text text="$test_a" source="$command"><replace string="{5554401,1}" with="''"/></substitute_text>
+            <set_value name="$test_b" exact="{5554401,1}+$test_a"/>
+            <do_if value="$command == $test_b and $command != $test_a">
+              <remove_value name="$test_b"/><remove_value name="$test_c"/>
+              <!-- Unpack Params - first check 2nd param for list or table, then put everything in a table or list -->
+              <set_value name="$params" exact="event.param3.$terms.clone"/>
+              <set_value name="$ListOrTable" exact="event.param3.$terms.{2}"/>
+              <remove_value name="$params.{1}" comment="remove command itself"/>
+              <do_if value="['L','T'].indexof.$ListOrTable">
+                <remove_value name="$params.{2}" comment="remove list or table input itself"/>
+              </do_if>
+              <do_else>
+                <set_value name="$ListOrTable" exact="'L'" comment="assuming list input in case this isnt provided as second param"/>
+              </do_else>
+              <do_if value="$ListOrTable" exact="'L'" comment="Inputting Params as List">
+                <set_value name="$Input" exact="[]"/>
+                <do_for_each in="$params" name="$param">
+                  <run_actions ref="EvaluatePropertyFromRoot" result="$tmp">
+                    <param name="pchain" value="$param"/>
+                    <param name="ListOutput" value="false"/>
+                  </run_actions>
+                  <append_to_list name="$Input" exact="$tmp"/>
+                </do_for_each>
+              </do_if>
+              <do_else comment="Inputting Params as Table">
+                <set_value name="$Input" exact="table[]"/>
+                <do_for_each in="$params" name="$param">
+                  <do_if value="not $paramname?">
+                    <set_value name="$paramname" exact="$param"/>
+                  </do_if>
+                  <do_else>
+                    <run_actions ref="EvaluatePropertyFromRoot" result="$tmp">
+                      <param name="pchain" value="$param"/>
+                      <param name="ListOutput" value="false"/>
+                    </run_actions>
+                    <set_value name="$Input.{$paramname}" exact="$tmp"/>
+                    <remove_value name="$paramname"/>
+                  </do_else>
+                </do_for_each>
+              </do_else>
+              
+              
+            </do_if>
+            <do_if value="$command" exact="{5554401,1}+'warp'">
+              <signal_cue_instantly cue="ShowMarker" param="3"/>
+              <do_if value="$ListOrTable" exact="'L'" comment="Inputting Params as List">
+                <warp object="$Input.{1}" sector="$Input.{2}"><safepos value="$Input.{3}"/></warp>
+              </do_if>
+              <do_else>
+                <warp object="$Input.{$object}" sector="$Input.{$sector}" zone="$Input.{$zone}"><safepos value="$Input.{$pos}"/><rotation value="$Input.{$rot}"/></warp>
+              </do_else>
+            </do_if>
           </actions>
         </cue>
         <cue name="DestroyObject" instantiate="true" namespace="this">
