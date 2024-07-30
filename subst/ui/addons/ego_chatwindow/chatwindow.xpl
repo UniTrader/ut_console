@@ -435,13 +435,9 @@ function menu.editboxSendMessage(_, text, textchanged, isconfirmed, wastableclic
   local terms_converted = {}
   for i, term in ipairs(terms) do
     local pchain_tmp = menu.Split_String_Multi(term, ".")
-    if #pchain_tmp == 1 then
-      table.insert(terms_converted,menu.convertStringToNumber(pchain_tmp[1]))
-    else
-      table.insert(terms_converted,{})
-      for j, property in ipairs(pchain_tmp) do
-        table.insert(terms_converted[#terms_converted],menu.convertStringToNumber(property))
-      end
+    table.insert(terms_converted,{})
+    for j, property in ipairs(pchain_tmp) do
+      table.insert(terms_converted[#terms_converted],menu.convertStringToNumber(property))
     end
   end
 

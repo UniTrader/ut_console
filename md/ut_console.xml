@@ -37,17 +37,17 @@
             <do_elseif value="event.name" exact="'event_cue_cancelled'">
               <reset_cue cue="ProtectMarker"/>
             </do_elseif>
-            <set_value name="$marker" exact="if $usage_stage == 0 then '' else if $usage_stage == 1 then '\033G#' else if $usage_stage == 2 then '\033Y#' else if $usage_stage == 3 then '\033R#' else '\033Z#'"/>
+            <set_value name="$marker" exact="if $usage_stage == 0 then '' else if $usage_stage == 1 then '\033G#\033X' else if $usage_stage == 2 then '\033Y#\033X' else if $usage_stage == 3 then '\033R#\033X' else '\033Z#\033X'"/>
             <do_if value="player.name != $playername">
               <!-- clear traces of Markers from name, and apply a new marker -->
               <substitute_text text="$playername" source="player.name">
-                <replace string="'\033G#'" with="''"/>
-                <replace string="'\033Y#'" with="''"/>
-                <replace string="'\033R#'" with="''"/>
-                <replace string="'\033Z#'" with="''"/>
+                <replace string="'\033G#\033X'" with="''"/>
+                <replace string="'\033Y#\033X'" with="''"/>
+                <replace string="'\033R#\033X'" with="''"/>
+                <replace string="'\033Z#\033X'" with="''"/>
               </substitute_text>
               <set_value name="$playername" exact="$marker + $playername"/>
-              <set_object_name object="player" name="$playername"/>
+              <set_object_name object="player.entity" name="$playername"/>
             </do_if>
             <!--do_if value="player.description != $playerdescription">
               <!- - clear traces of Markers from name, and apply a new marker - ->
@@ -173,17 +173,8 @@
                 <continue/>
               </do_if>
               <raise_lua_event name="'Chat_Window_API.Print'" param="'evaluating ' + $terms.{$i}" chance="$debugmode * 100"/>
-              <run_actions ref="GetRootProperty" result="$rootProperty">
+              <run_actions ref="EvaluatePropertyFromRoot" result="$returnValue">
                 <param name="pchain" value="$terms_converted.{$i}"/>
-              </run_actions>
-              <do_if value="$rootProperty == null">
-                <raise_lua_event name="'Chat_Window_API.Print'" param="$terms_converted.{$i} + ' - Root Property not found - skipping.'"/>
-                <continue/>
-              </do_if>
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'Evaluating Data for ' + $rootProperty" chance="$debugmode * 100"/>
-              <run_actions ref="EvaluateProperty" result="$returnValue">
-                <param name="PropertyList" value="$terms_converted.{$i}"/>
-                <param name="PropertyValue" value="$rootProperty"/>
                 <param name="ListOutput" value="$ListOutput"/>
               </run_actions>
               <do_if value="$ListOutput == false">
@@ -215,69 +206,43 @@
             <set_value name="$Get2_pchain" exact="@$terms_converted.{4}"/>
             <set_value name="$abortreason" exact="null"/>
             <!-- first get the values we want to save, as very first the optional second value -->
-            <set_value name="$Get2Value" exact="null" comment="second value is rarely needed. assuming it isnt needed here, but we want to pass both."/>
             <do_if value="$Get2_pchain != null">
-              <run_actions ref="GetRootProperty" result="$Get2RootProperty">
+              <run_actions ref="EvaluatePropertyFromRoot" result="$Get2Value">
                 <param name="pchain" value="$Get2_pchain"/>
-              </run_actions>
-              <do_if value="$Get2RootProperty != null">
-                <raise_lua_event name="'Chat_Window_API.Print'" param="'Evaluating Data for ' + $Get2RootProperty" chance="$debugmode * 100"/>
-                <run_actions ref="EvaluateProperty" result="$Get2Value">
-                  <param name="PropertyList" value="$Get2_pchain"/>
-                  <param name="PropertyValue" value="$Get2RootProperty"/>
-                  <param name="ListOutput" value="false"/>
-                </run_actions>
-              </do_if>
-            </do_if>
-            
-            <!-- Next the non-optional Value to set - note: take care to handle null values to be able to clear stutff!! -->
-            <run_actions ref="GetRootProperty" result="$GetRootProperty">
-              <param name="pchain" value="$Get_pchain"/>
-            </run_actions>
-            <do_if value="$GetRootProperty == null">
-              <set_value name="$abortreason" exact="$Get_pchain + ' - Root Property of Get Term not found - aborting.'"/>
-            </do_if>
-            <do_else>
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'Evaluating Data for ' + $GetRootProperty" chance="$debugmode * 100"/>
-              <run_actions ref="EvaluateProperty" result="$GetValue">
-                <param name="PropertyList" value="$Get_pchain"/>
-                <param name="PropertyValue" value="$GetRootProperty"/>
                 <param name="ListOutput" value="false"/>
               </run_actions>
+              <do_if value="$Get2Value == 'error'">
+                <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Get2 Term not found - aborting.'"/>
+              </do_if>
+            </do_if>
+            <do_else>
+              <set_value name="$Get2Value" exact="null" comment="second value is rarely needed. assuming it isnt needed here, but we want to pass both for simplicity."/>
             </do_else>
             
-            <!-- Finally working on getting the Set Value -->
-            <do_if value="$abortreason != null"/>
-            <do_elseif value="$GetValue == null">
-              <set_value name="$abortreason" exact="$Get_pchain + ' - End Property of Get Term not found - aborting.'"/>
-            </do_elseif>
-            <do_else>
-              <!-- Some Special Handling needed in case of certain root properties or end values -->
-              <run_actions ref="GetRootProperty" result="$SetRootProperty">
-                <param name="pchain" value="$Set_pchain"/>
-              </run_actions>
-            </do_else>
-            <do_if value="$abortreason != null"/>
-            <do_elseif value="$SetRootProperty == null">
-              <set_value name="$abortreason" exact="$Set_pchain + ' - Root Property of Set Term not found - aborting.'"/>
-            </do_elseif>
-            <do_else>
-              <!-- Seperating ot the final property to set, since it is needed fr setting, but doesnt have to be valuated -->
-              <set_value name="$SetProperty" exact="$Set_pchain.{$Set_pchain.count}"/>
-              <remove_value name="$Set_pchain.{$Set_pchain.count}"/>
-              <run_actions ref="EvaluateProperty" result="$SetValue">
-                <param name="PropertyList" value="$Set_pchain"/>
-                <param name="PropertyValue" value="$rootProperty"/>
-                <param name="ListOutput" value="$ListOutput"/>
-              </run_actions>
-            </do_else>
+            <!-- Next the non-optional Value to set - note: take care to handle null values to be able to clear stutff!! -->
+            <run_actions ref="EvaluatePropertyFromRoot" result="$GetValue">
+              <param name="pchain" value="$Get_pchain"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <do_if value="$GetValue == 'error'">
+              <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Get Term not found - aborting.'"/>
+            </do_if>
+            
+            
+            <!-- Some Special Handling needed in case of certain root properties or end values - ToDo !! -->
+            <!-- Seperating ot the final property to set, since it is needed for setting, but doesnt have to be valuated -->
+            <set_value name="$SetProperty" exact="$Set_pchain.{$Set_pchain.count}"/>
+            <remove_value name="$Set_pchain.{$Set_pchain.count}"/>
+            <run_actions ref="EvaluatePropertyFromRoot" result="$SetValue">
+              <param name="pchain" value="$Set_pchain"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <do_if value="$SetValue == 'error'">
+              <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Set Term not found - aborting.'"/>
+            </do_if>
             
             <!-- We got all the Values we needed for the Action - perform it!-->
-            <do_if value="$abortreason != null"/>
-            <do_elseif value="$SetValue == null">
-              <set_value name="$abortreason" exact="$Set_pchain + ' - End Property of Set Term not found - aborting.'"/>
-            </do_elseif>
-            <do_else>
+            <do_if value="$abortreason == null">
               <run_actions ref="SaveProperty" result="$FinalValue">
                 <param name="Property" value="$SetProperty"/>
                 <param name="PropertyValue" value="$SetValue"/>
@@ -285,12 +250,14 @@
                 <param name="SaveValue" value="$GetValue"/>
                 <param name="SaveValue2" value="$Get2Value"/>
               </run_actions>
-            </do_else>
-            <do_if value="$abortreason != null"/>
+            </do_if>
+            <do_if value="$abortreason != null">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="$abortreason"/>
+            </do_if>
             <do_elseif value="$FinalValue == 'Fictious Property'">
               <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - cannot confirm since its not property-accessible'.[$SetValue,$SetProperty,$GetValue,$Get2Value]"/>
             </do_elseif>
-            <do_elseif value="$FinalValue !=  $GetValue">
+            <do_elseif value="$FinalValue ==  $GetValue">
               <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - success'.[$SetValue,$SetProperty,$GetValue,$Get2Value]"/>
             </do_elseif>
             <do_else>
@@ -302,7 +269,6 @@
           <conditions>
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
             <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'destroy'"/>
-            <debug_text filter="general" text="'Destroy triggered' + event.param3"/>
           </conditions>
           <actions>
             <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'" chance="Root.$debugmode * 100"/>
@@ -318,10 +284,13 @@
                 <set_value name="$explosion" exact="true"/>
               </do_else>
               <!-- Get Object from Term Number 2 -->
-              <run_actions ref="GetObject" result="$object">
-                <param name="term" value="$terms_converted.{2}"/>
-                <param name="multiple" value="false"/>
+              <run_actions ref="EvaluatePropertyFromRoot" result="$object">
+                <param name="pchain" value="$terms_converted.{2}"/>
+                <param name="ListOutput" value="false"/>
               </run_actions>
+              <do_if value="(typeof $object).isnumeric" comment="convert in case the input was a single number">
+                <set_value name="$object" exact="component.{$object}"/>
+              </do_if>
               <do_if value="$object.exists">
                 <do_if value="player.entity.hascontext.{$object}">
                   <set_value name="$confirmcodes" exact="['YesIWantToDie']"/>
@@ -426,18 +395,51 @@
             </do_if>
           </actions>
         </library>
+        <library name="EvaluatePropertyFromRoot" purpose="run_actions">
+          <params>
+            <param name="pchain" comment="property chain. Will be modified to remove the evaluated terms."/>
+            <param name="ListOutput" default="false"/>
+          </params>
+          <actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="'Evaluating from Root:' + $pchain" chance="Root.$debugmode * 100"/>
+            
+            <run_actions ref="GetRootProperty" result="$rootProperty">
+              <param name="pchain" value="$pchain"/>
+            </run_actions>
+            <do_if value="(typeof $rootProperty).isnumeric and $pchain.count">
+              <set_value name="$rootProperty" exact="component.{$rootProperty}"/>
+            </do_if>
+            <do_elseif value="$rootProperty == 'error' or $rootProperty == null or $pchain.count == 0">
+              <do_if value="$ListOutput">
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'returning:' +  $rootProperty + ' unchanged as list'" chance="Root.$debugmode * 100"/>
+                <return value="[$rootProperty]"/>
+              </do_if>
+              <do_else>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'returning:' + $rootProperty + ' unchanged'" chance="Root.$debugmode * 100"/>
+                <return value="$rootProperty"/>
+              </do_else>
+            </do_elseif>
+            <run_actions ref="EvaluateProperty" result="$returnValue">
+              <param name="PropertyList" value="$pchain"/>
+              <param name="PropertyValue" value="$rootProperty"/>
+              <param name="ListOutput" value="$ListOutput"/>
+            </run_actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="'returning: ' + $returnValue" chance="Root.$debugmode * 100"/>
+            <return value="$returnValue"/>
+          </actions>
+        </library>
         <library name="GetRootProperty" purpose="run_actions">
           <params>
             <param name="pchain" comment="property chain to get the root property from. Will be modified to remove the evaluated terms."/>
           </params>
           <actions>
             <set_value name="$root_term" exact="$pchain.{1}"/>
-            <!-- first try to resolve it as Object  -->
+            <!-- first try to resolve it as Object -->
             <run_actions ref="GetObject" result="$returnValue">
               <param name="term" value="$root_term"/>
-              <param name="multiple" value="false"/>
+              <param name="returnAsIs" value="true"/>
             </run_actions>
-            <do_if value="$returnValue.exists">
+            <do_if value="@$returnValue.exists">
               <remove_value name="$pchain.{1}"/>
               <return value="$returnValue"/>
             </do_if>
@@ -445,15 +447,19 @@
 Skipping: the following root properties for now (and reasoning):
 player. => currently implemented as kind of global properties - have to improve on that. also maybe not call this for them.
 -->
-            <do_if value="(typeof $root_term).isnumeric" comment="error out - we dont have numerical properties! it could just be an Object">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'Got a numerical identifier, usually an Object, but no object found: ' + $root_term"/>
-              <return value="null"/>
+            <do_if value="(typeof $root_term).isnumeric" comment="return. not sure if this is an object reference, or a number, let the function using it decide.">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'Got a numerical identifier, returning number as is: ' + $root_term" chance="Root.$debugmode * 100"/>
+              <remove_value name="$pchain.{1}"/>
+              <return value="$root_term"/>
             </do_if>
             <do_elseif value="$console_vars.{$root_term}?" comment="there is a console var with the same name as the root term">
               <set_value name="$returnValue" exact="$console_vars.{$root_term}"/>
               <remove_value name="$pchain.{1}"/>
               <return value="$returnValue"/>
             </do_elseif>
+            <do_elseif value="$root_term" exact="'null'"><remove_value name="$pchain.{1}"/><return value="null"/></do_elseif>
+            <do_elseif value="$root_term" exact="'true'"><remove_value name="$pchain.{1}"/><return value="0"/></do_elseif>
+            <do_elseif value="$root_term" exact="'false'"><remove_value name="$pchain.{1}"/><return value="1"/></do_elseif>
             <do_elseif value="$root_term" exact="'global'" comment="read a global var as start param - getting info from first two properties">
               <set_value name="$returnValue" exact="global.{$pchain.{2}}"/>
               <do_if value="$returnValue.exists">
@@ -461,6 +467,12 @@ player. => currently implemented as kind of global properties - have to improve 
                 <remove_value name="$pchain.{1}"/>
                 <return value="$returnValue"/>
               </do_if>
+            </do_elseif>
+            <do_elseif value="$root_term == 'component' or $root_term == 'object'" comment="getting an object from a number  - using first 2 properties">
+              <set_value name="$returnValue" exact="component.{$pchain.{2}}"/>
+              <remove_value name="$pchain.{1}"/>
+              <remove_value name="$pchain.{1}"/>
+              <return value="$returnValue"/>
             </do_elseif>
             <do_elseif value="$root_term" exact="'gameparam'" comment="reading game params - getting info from first two properties">
               <set_value name="$returnValue" exact="param.{$pchain.{2}}"/>
@@ -880,7 +892,7 @@ player. => currently implemented as kind of global properties - have to improve 
             </do_elseif>
             <do_else>
               <raise_lua_event name="'Chat_Window_API.Print'" param="'Invalid root property ' + $root_term"/>
-              <return value="$returnValue"/>
+              <return value="'error'"/>
             </do_else>
             </do_else>
           </actions>
@@ -889,13 +901,14 @@ player. => currently implemented as kind of global properties - have to improve 
           <!-- This Cue is intended to convert the Term input Params to proper Objects -->
           <params>
             <param name="term" comment="term to evaluate/get the object from. can be a number or a string."/>
-            <param name="multiple" comment="Return possibly multiple objects as list? will return default with error if an implicit multi object term is used"/>
+            <param name="multiple" default="false" comment="Return possibly multiple objects as list? will return default with error if an implicit multi object term is used"/>
+            <param name="returnAsIs" default="false" comment="return input as is if no result is found"/>
           </params>
           <actions>
             <set_value name="$retval" exact="null"/>
             <do_if value="(typeof $term).isnumeric" comment="object identifier">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'Passing Numeric identifier ( %s - %s )'.[ $term , $term]" chance="Root.$debugmode * 100"/>
-              <set_value name="$retval" exact="component.{$term}"/>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'Passing Numeric identifier ( %s )'.[ $term ]" chance="Root.$debugmode * 100"/>
+              <set_value name="$retval" exact="$term"/>
             </do_if>
             <do_elseif value="$console_vars.{$term}?" comment="Saved Console Var">
               <raise_lua_event name="'Chat_Window_API.Print'" param="'Using saved Console Var ( %s - %s )'.[ $term , $console_vars.{$term} ]" chance="Root.$debugmode * 100"/>
@@ -946,12 +959,15 @@ player. => currently implemented as kind of global properties - have to improve 
             <do_if value="$multiple and (typeof $retval) != datatype.list">
               <set_value name="$retval" exact="[$retval]"/>
             </do_if>
-            <do_if value="$retval.exists">
+            <do_if value="@$retval.exists">
               <return value="$retval"/>
             </do_if>
+            <do_elseif value="$returnAsIs">
+              <return value="$term"/>
+            </do_elseif>
             <do_else>
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'Object Parameter %s not found. Returning null'.[$term]" chance="Root.$debugmode * 100"/>
-              <return value="null"/>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'Object Parameter %s not found. Returning error'.[$term]" chance="Root.$debugmode * 100"/>
+              <return value="'error'"/>
             </do_else>
           </actions>
         </library>
@@ -963,6 +979,9 @@ player. => currently implemented as kind of global properties - have to improve 
           </params>
           <actions>
             <debug_text filter="general" text="'EvaluateProperty called for:' + $PropertyValue + '//' + $PropertyList" chance="Root.$debugmode * 100"/>
+            <do_if value="$PropertyList.count == 0" comment="root property is end property - just return the value">
+              <return value="$PropertyValue"/>
+            </do_if>
             <set_value name="$currentProperty" exact="$PropertyList.{1}"/>
             <do_if value="false" comment="special handling properties, written by hand">
             
@@ -1933,11 +1952,11 @@ In case of Error $PropertyList will contain all non-evaluated properties. Also t
                   <set_value operation="insert" name="$returnValue.{1}" exact="$resultValue"/>
                   <return value="$returnValue" comment="Returning result from further down the chain, appending our result"/>
                 </do_if>
-                <do_elseif value="$returnValue != null">
-                  <return value="$returnValue" comment="Returning Result from further down the Chain"/>
+                <do_elseif value="$returnValue == 'error'">
+                  <return value="$resultValue" comment="Returning Our Result because Chain terminated in the next step ($PropertyList should contain the not evaluated properties)"/>
                 </do_elseif>
                 <do_else>
-                  <return value="$resultValue" comment="Returning Our Result because Chain terminated in the next step ($PropertyList should contain the not evaluated properties)"/>
+                  <return value="$returnValue" comment="Returning Result from further down the Chain"/>
                 </do_else>
               </do_if>
               <do_if value="$ListOutput">
@@ -1951,7 +1970,7 @@ In case of Error $PropertyList will contain all non-evaluated properties. Also t
               <return value="$PropertyList.clone" comment="Couldnt resolve further properties - returning missing ones so non-evaluated properties get returned as string"/>
             </do_if>
             <do_else>
-              <return value="$resultValue"/>
+              <return value="'error'"/>
             </do_else>
           </actions>
         </library>
@@ -1964,8 +1983,8 @@ In case of Error $PropertyList will contain all non-evaluated properties. Also t
             <param name="SaveValue2" default="false"/>
           </params>
           <actions>
-            <debug_text filter="general" text="'SaveProperty called for:' + $PropertyValue + '//' + $PropertyList" chance="Root.$debugmode * 100"/>
-            <set_value name="$currentProperty" exact="$PropertyList.{1}"/>
+            <debug_text filter="general" text="'SaveProperty called for:' + $PropertyValue + '//' + $Property" chance="Root.$debugmode * 100"/>
+            <debug_text filter="general" text="'SaveValue:' + $SaveValue + '//' + $SaveValue2" chance="Root.$debugmode * 100"/>
             <!-- Finding the Value to set - most will require special handling -->
             <do_if value="false" comment="Allow to do everything in a copy-able do_elseif"/>
 <!-- drop in all non-setable values here for now, mostly because i see no sensible use case/retrieval way for the vars, or they are too generic and other stuff should be handled first
@@ -2577,9 +2596,11 @@ attribute	name	set_object_velocity
               </do_else>
             </do_elseif>
             <do_elseif value="$Property == 'minhull'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'minhull set called for:' + $PropertyValue + '//' + $Property + '//' + $SaveValue"/>
               <set_object_min_hull object="$PropertyValue" exact="$SaveValue"/>
             </do_elseif>
             <do_elseif value="$Property == 'minshield'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'minshield set called for:' + $PropertyValue + '//' + $Property + '//' + $SaveValue"/>
               <set_object_min_shield object="$PropertyValue" exact="$SaveValue"/>
             </do_elseif>
             <do_elseif value="$Property == 'hull'">
@@ -2797,7 +2818,7 @@ attribute	name	set_object_velocity
 
 
 <!-- If possible get the Value we just set for Feedback purposes, and print it to the Log-->
-            <do_if value="$FictiousProperty" comment="Print the Value we just set without getting it first in case its unretrievable with a property evaluation">
+            <do_if value="@$FictiousProperty" comment="Print the Value we just set without getting it first in case its unretrievable with a property evaluation">
               <return value="'Fictious Property'"/>
             </do_if>
             <do_else>
