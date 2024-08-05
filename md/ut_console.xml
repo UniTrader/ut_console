@@ -9,7 +9,7 @@
   <cues>
     <cue name="Root">
       <actions>
-        <set_value name="$secretvalue" exact="'You will never see this!!!'"/>
+        <set_value name="$secretvalue" exact="'You will never see this!!!'" comment="test value for the eval md command"/>
         <set_value name="$debugmode" exact="false"/>
         <set_value name="$console_vars" exact="table[]"/>
         <!-- aligned Lists: output stores the console output, type stores what kind of message it was for future filtering-->
@@ -272,11 +272,10 @@
             </do_else>
           </actions>
         </cue>
-        <cue name="PerformAction" instantiate="true" namespace="this">
+        <cue name="PerformAction" instantiate="true" namespace="this" comment="collection of small actions that doesnt need much logic">
           <conditions><!-- ALL IMPLEMENTED COMMANDS MUST BE LISTED IN HERE!!! -->
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
             <check_any>
-              <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'warp'"/>
               <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'copyobject'"/><!-- WiP; dont forget mods -->
             </check_any>
           </conditions>
@@ -326,15 +325,6 @@
               </do_else>
               
               
-            </do_if>
-            <do_if value="$command" exact="{5554401,1}+'warp'">
-              <signal_cue_instantly cue="ShowMarker" param="3"/>
-              <do_if value="$ListOrTable" exact="'L'" comment="Inputting Params as List">
-                <warp object="$Input.{1}" sector="$Input.{2}"><safepos value="$Input.{3}"/></warp>
-              </do_if>
-              <do_else>
-                <warp object="$Input.{$object}" sector="$Input.{$sector}" zone="$Input.{$zone}"><safepos value="$Input.{$pos}"/><rotation value="$Input.{$rot}"/></warp>
-              </do_else>
             </do_if>
           </actions>
         </cue>
@@ -469,7 +459,7 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
               <set_value name="$macro" exact="$macro.macro"/>
             </do_elseif>
             
-            <do_if value="$macro != null" comment="make sure it exists before starting the Spam">
+            <do_if value="(typeof $macro) == datatype.macro" comment="make sure it exists before starting the Spam">
               <!-- Gather general Data about the Macro -->
               <set_value name="$output" exact="'     Macro Data for ' + $macro.id"/>
               <set_value name="$output" exact="$output + '\n=&gt;name: ' + $macro.name"/>
@@ -611,7 +601,7 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
               <set_value name="$output" exact="$output + '\n=&gt;typename: ' + $TestShip.typename"/>
               <set_value name="$output" exact="$output + '\n=&gt;numfreeactorslots: ' + $TestShip.numfreeactorslots"/>
               <set_value name="$output" exact="$output + '\n=&gt;docksize: ' + $TestShip.docksize"/>
-              <set_value name="$output" exact="$output + '\n=&gt;dockslot.name: ' + $TestShip.dockslot.name"/>
+              <set_value name="$output" exact="$output + '\n=&gt;dockslot.name: ' + @$TestShip.dockslot.name"/>
               <set_value name="$output" exact="$output + '\n=&gt;canenterhighway: ' + $TestShip.canenterhighway"/><!-- bool -->
               <set_value name="$output" exact="$output + '\n=&gt;iscapitalship: ' + $TestShip.iscapitalship"/><!-- bool -->
               <set_value name="$output" exact="$output + '\n=&gt;islasertower: ' + $TestShip.islasertower"/><!-- bool -->
@@ -645,7 +635,7 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
                 <set_value name="$output" exact="$output + '\n' + $jobid + ' : ' + $count"/>
               </do_for_each>
               
-              <raise_lua_event name="'Chat_Window_API.Print'" param="$output"/>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'Output File is ' + 'ut_console/' + $macro.id + ' report.txt'"/>
               <!--debug_text filter="general" text="$output"/-->
               <debug_to_file directory="'ut_console'" name="$macro.id+' report.txt'" text="$output" append="false"/>
             </do_if>
@@ -654,7 +644,7 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
             </do_else>
           </actions>
           <cues>
-            <cue name="RotatePaintjob" checkinterval="$paintcycletime" instantiate="true">
+            <cue name="RotatePaintjob">
               <actions>
                 <set_value name="$paintcount" operation="add"/>
                 <do_if value="$paintcount gt $paintmods.count">
@@ -662,6 +652,10 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
                 </do_if>
                 <add_paint_mod object="$WreckShip" ware="$paintmods.{$paintcount}"/>
                 <add_paint_mod object="$TestShip" ware="$paintmods.{$paintcount}"/>
+              </actions>
+              <delay exact="$paintcycletime"/>
+              <actions>
+                <reset_cue cue="this"/>
               </actions>
             </cue>
             <cue name="Cleanup">
@@ -673,6 +667,52 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
               </actions>
             </cue>
           </cues>
+        </cue>
+        <cue name="WarpObject" instantiate="true" namespace="this">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'warp'"/>
+          </conditions>
+          <actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'" chance="Root.$debugmode * 100"/>
+            <signal_cue_instantly cue="ShowMarker" param="3"/>
+            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'info [h(elp)] $object1$ $object2$\nTeleports Object1 to/near Object2. Object2 may be another Object, or any space. in case it is galaxy or cluster a random sector within is chosen.'"/>
+            <include_actions ref="PrintHelpAndUnpackTerms"/>
+            <run_actions ref="EvaluatePropertyFromRoot" result="$WarpObject">
+              <param name="pchain" value="$terms_converted.{2}"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <do_if value="(typeof $WarpObject).isnumeric">
+              <set_value name="$WarpObject" exact="component.{$WarpObject}"/>
+            </do_if>
+            <run_actions ref="EvaluatePropertyFromRoot" result="$DestinationObject">
+              <param name="pchain" value="$terms_converted.{3}"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <do_if value="(typeof $DestinationObject).isnumeric">
+              <set_value name="$DestinationObject" exact="component.{$DestinationObject}"/>
+            </do_if>
+            
+            <do_if value="$DestinationObject.isclass.cluster or $DestinationObject.isclass.galaxy">
+              <find_sector name="$DestinationSector" space="$DestinationObject"/>
+              <create_position name="$DestinationPos" x="0" y="0" z="0"/>
+            </do_if>
+            <do_elseif value="$DestinationObject.isclass.sector">
+              <set_value name="$DestinationSector" exact="$DestinationObject"/>
+              <create_position name="$DestinationPos" x="0" y="0" z="0"/>
+            </do_elseif>
+            <do_elseif value="$DestinationObject.isclass.zone">
+              <set_value name="$DestinationSector" exact="$DestinationObject.sector"/>
+              <create_position name="$DestinationPos" value="$DestinationObject.position"/>
+            </do_elseif>
+            <do_else>
+              <set_value name="$DestinationSector" exact="$DestinationObject.sector"/>
+              <create_position name="$DestinationPos" space="$DestinationSector" object="$DestinationObject"/>
+            </do_else>
+            <warp object="$WarpObject" sector="$DestinationSector">
+              <safepos value="$DestinationPos"/>
+            </warp>
+          </actions>
         </cue>
         <cue name="Debugmode" instantiate="true">
           <conditions>
@@ -689,6 +729,59 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
             </do_else>
             <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Enabled'" chance="$debugmode * 100"/>
             <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Disabled'" chance="(not $debugmode) * 100"/>
+          </actions>
+        </cue>
+        <cue name="CueManager" instantiate="true" namespace="this">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'cue'"/>
+          </conditions>
+          <actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'" chance="Root.$debugmode * 100"/>
+            <signal_cue_instantly cue="ShowMarker" param="3"/>
+            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'info [h(elp)] $action$ $cue$\nCan force Cues into certain states. possible actions:\nstate: returns the cue state (harmless, but prefer eval for this)\ncancel: cancels the cue and its sub-cues\nreset: resets the cue and its sub-cues\ncomplete: marks the cue as completed\nforce: will force a cue to trigger\nsignal: signals the cue; if there is another param it will signal instantly with that.'"/>
+            <include_actions ref="PrintHelpAndUnpackTerms"/>
+            <!-- get cue -->
+            <run_actions ref="EvaluatePropertyFromRoot" result="$Cue">
+              <param name="pchain" value="$terms_converted.{3}"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <!-- perform action -->
+            <do_if value="$Cue.exists">
+              <do_if value="$terms.{2}" exact="'state'">
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'%s state is : %s'.[$Cue.name,$Cue.state]"/>
+              </do_if>
+              <do_elseif value="$terms.{2}" exact="'cancel'">
+                <cancel_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Cancel\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+              </do_elseif>
+              <do_elseif value="$terms.{2}" exact="'reset'">
+                <reset_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Reset\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+              </do_elseif>
+              <do_elseif value="$terms.{2}" exact="'complete'">
+                <complete_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Complete\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+              </do_elseif>
+              <do_elseif value="$terms.{2}" exact="'force'">
+                <force_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Force\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+              </do_elseif>
+              <do_elseif value="$terms.{2}" exact="'signal'">
+                <do_if value="not $terms.{4}?">
+                  <signal_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Signal\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+                </do_if>
+                <do_else>
+                  <run_actions ref="EvaluatePropertyFromRoot" result="$Param">
+                    <param name="pchain" value="$terms_converted.{3}"/>
+                    <param name="ListOutput" value="false"/>
+                  </run_actions>
+                  <signal_cue_instantly cue="$Cue" param="$Param"/>
+                  <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Signal instantly with param %s\n%s state was : %s'.[$Param,$Cue.name,$Cue.state]"/>
+                </do_else>
+              </do_elseif>
+            </do_if>
           </actions>
         </cue>
         <cue name="ProtectMarker" instantiate="true">
