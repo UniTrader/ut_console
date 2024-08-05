@@ -3,8 +3,8 @@
 <!-- Usage Stage Examples (this Value can only ever increase):
 0 - never entered a console command
 1/green - read only commands (ReadText, Eval, Debugmode)
-2/yellow - Actual operations done in the Save, but should be safe to perform (DestroyObject on destructible stuff)
-3/red - Actual operations done in the Save, with unknown implications (DestroyObject on protected stuff; SetVal)
+2/yellow - Actual operations done in the Save, but should be safe to perform (DestroyObject on destructible stuff, PerformAction)
+3/red - Actual operations done in the Save, with unknown implications (DestroyObject on protected stuff; SetVal; PerformAction for certain actions considered unsafe)
 -->
   <cues>
     <cue name="Root">
@@ -277,6 +277,7 @@
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
             <check_any>
               <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'warp'"/>
+              <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'copyobject'"/><!-- WiP; dont forget mods -->
             </check_any>
           </conditions>
           <actions>
@@ -291,7 +292,7 @@
               <set_value name="$params" exact="event.param3.$terms.clone"/>
               <set_value name="$ListOrTable" exact="event.param3.$terms.{2}"/>
               <remove_value name="$params.{1}" comment="remove command itself"/>
-              <do_if value="['L','T'].indexof.$ListOrTable">
+              <do_if value="['L','T'].indexof.{$ListOrTable}">
                 <remove_value name="$params.{2}" comment="remove list or table input itself"/>
               </do_if>
               <do_else>
@@ -413,6 +414,262 @@
                     </do_else>
                   </do_else>
                 </do_if>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+        <cue name="CheckShip" instantiate="true" namespace="this">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'checkship'"/>
+          </conditions>
+          <actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'" chance="Root.$debugmode * 100"/>
+            <signal_cue_instantly cue="ShowMarker" param="2"/>
+            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'checkship [h(elp)] $macro$ (crewskill.&lt;number&gt;) (paintcycletime.&lt;number&gt;) (ware.paintmod&lt;number&gt;) \n
+Spawns the Ship/Object macro given, and collects some Stats about it (General info, Availability, Ressources, Spawn Amounts) which are sent via Message. \n
+Note that several Boolean Infos might be condensed to two lines\n
+You can also specify a Crew Skill level (in Starts) and one or more Paintmods to add to the check loop, and change the tie to switch paintjobss'"/>
+            <include_actions ref="PrintHelpAndUnpackTerms"/>
+            <run_actions ref="EvaluatePropertyFromRoot" result="$macro">
+              <param name="pchain" value="$terms_converted.{2}"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <set_value name="$crewskill" exact="5"/>
+            <set_value name="$paintcycletime" exact="3s"/>
+            <set_value name="$paintmods" exact="[]"/>
+            <do_all exact="$terms_converted.count" counter="$i">
+              <do_if value="$i le 2" comment="skip first two - command name and primary input."/>
+              <do_elseif value="$terms_converted.{$i}.{1}" exact="'crewskill'">
+                <set_value name="$crewskill" exact="$terms_converted.{$i}.{2}"/>
+              </do_elseif>
+              <do_elseif value="$terms_converted.{$i}.{1}" exact="'paintcycletime'">
+                <set_value name="$paintcycletime" exact="($terms_converted.{$i}.{2})s"/>
+              </do_elseif>
+              <do_elseif value="$terms_converted.{$i}.{1}" exact="'ware'">
+                <!-- add custom paintmods (no dynamic reference to them, just the ware name) -->
+                <do_if value="ware.{$terms_converted.{$i}.{2}}.ispaintmod">
+                  <append_to_list name="$paintmods" exact="ware.{$terms_converted.{$i}.{2}}"/>
+                </do_if>
+              </do_elseif>
+            </do_all>
+            <append_to_list name="$paintmods" exact="ware.paintmod_0117" comment="Solset - Terran White"/>
+            <append_to_list name="$paintmods" exact="ware.paintmod_0001" comment="Shade of Innocence - no modifiers to paint"/>
+            <append_to_list name="$paintmods" exact="ware.paintmod_0051" comment="Roadkill - low brightness, low saturation"/>
+            <append_to_list name="$paintmods" exact="ware.paintmod_0057" comment="Legitimate Business - low brightness, high saturation"/>
+            <append_to_list name="$paintmods" exact="ware.paintmod_0018" comment="Grey Steel - high brightness, low saturation"/>
+            <append_to_list name="$paintmods" exact="ware.paintmod_0177" comment="Sweet Corruption - high brightness, high saturation"/>
+            <append_to_list name="$paintmods" exact="ware.paintmod_0136" comment="Corrosive - for Dirt and Rust"/>
+            <append_to_list name="$paintmods" exact="ware.paintmod_0015" comment="Not Like This (Error theme) - for reasons.."/>
+            <!-- Technically you can pass an Object here too -->
+            <do_if value="@(typeof $macro).isnumber">
+              <set_value name="$macro" exact="component.{$macro}.macro"/>
+            </do_if>
+            <do_elseif value="(typeof $macro) == datatype.component">
+              <set_value name="$macro" exact="$macro.macro"/>
+            </do_elseif>
+            
+            <do_if value="$macro != null" comment="make sure it exists before starting the Spam">
+              <!-- Gather general Data about the Macro -->
+              <set_value name="$output" exact="'     Macro Data for ' + $macro.id"/>
+              <set_value name="$output" exact="$output + '\n=&gt;name: ' + $macro.name"/>
+              <set_value name="$output" exact="$output + '\n=&gt;rawname: ' + $macro.rawname"/>
+              <set_value name="$output" exact="$output + '\n=&gt;description: ' + $macro.description"/>
+              <set_value name="$output" exact="$output + '\n=&gt;extension: ' + $macro.extension + if $macro.isextensionpersonal then '(Personal)' else ''"/>
+              <set_value name="$output" exact="$output + '\n=&gt;class: ' + $macro.class"/>
+              <set_value name="$output" exact="$output + '\n=&gt;primarypurpose: ' + $macro.primarypurpose.name"/>
+              <set_value name="$output" exact="$output + '\n=&gt;icon: ' + $macro.icon"/>
+              <set_value name="$output" exact="$output + '\n=&gt;makerraces: ' + $macro.makerraces"/>
+              <set_value name="$output" exact="$output + '\n=&gt;threatscore: ' + $macro.threatscore"/>
+              <set_value name="$output" exact="$output + '\n=&gt;purposename: ' + $macro.purposename"/>
+              <set_value name="$output" exact="$output + '\n=&gt;docksize: ' + $macro.docksize"/>
+              <set_value name="$output" exact="$output + '\n=&gt;ware id: ' + $macro.ware.id"/>
+              <set_value name="$output" exact="$output + '\n=&gt;isunit // isdeployable // islasertower: '"/>
+              <set_value name="$output" exact="$output + '\n' + $macro.isunit + ' // ' + $macro.isdeployable + ' // ' + $macro.islasertower"/>
+              <set_value name="$output" exact="$output + '\n=&gt;boundingbox.exists: ' + $macro.boundingbox.exists"/>
+              <set_value name="$output" exact="$output + '\n=&gt;boundingbox.max: ' + $macro.boundingbox.max"/>
+              <set_value name="$output" exact="$output + '\n=&gt;boundingbox.center: ' + $macro.boundingbox.center"/>
+              <set_value name="$output" exact="$output + '\n=&gt;maxradarrange: ' + $macro.maxradarrange"/>
+              <set_value name="$output" exact="$output + '\n=&gt;people.capacity: ' + $macro.people.capacity"/>
+              <set_value name="$output" exact="$output + '\n=&gt;isdatavault // islandmark // canclaimownership'"/>
+              <set_value name="$output" exact="$output + '\n' + $macro.isdatavault + ' // ' + $macro.islandmark + ' // ' + $macro.canclaimownership"/>
+              <set_value name="$output" exact="$output + '\n=&gt;explosiondamage.total: ' + $macro.explosiondamage.total"/>
+              <set_value name="$output" exact="$output + '\n=&gt;explosiondamage.hullshield: ' + $macro.explosiondamage.hullshield"/>
+              <set_value name="$output" exact="$output + '\n=&gt;explosiondamage.hullonly: ' + $macro.explosiondamage.hullonly"/>
+              <set_value name="$output" exact="$output + '\n=&gt;explosiondamage.shieldonly: ' + $macro.explosiondamage.shieldonly"/>
+              <set_value name="$output" exact="$output + '\n=&gt;explosiondamage.hullnoshield: ' + $macro.explosiondamage.hullnoshield"/>
+              
+              <set_value name="$output" exact="$output + '\n\n####################################################\n     Ware Data for ' + $macro.ware.id"/>
+              <set_value name="$output" exact="$output + '\n=&gt;name: ' + $macro.ware.name"/>
+              <set_value name="$output" exact="$output + '\n=&gt;rawname: ' + $macro.ware.rawname"/>
+              <set_value name="$output" exact="$output + '\n=&gt;description: ' + $macro.ware.description"/>
+              <set_value name="$output" exact="$output + '\n=&gt;icon: ' + $macro.ware.icon"/>
+              <set_value name="$output" exact="$output + '\n=&gt;minprice: ' + $macro.ware.minprice"/>
+              <set_value name="$output" exact="$output + '\n=&gt;averageprice: ' + $macro.ware.averageprice"/>
+              <set_value name="$output" exact="$output + '\n=&gt;maxprice: ' + $macro.ware.maxprice"/>
+              <set_value name="$output" exact="$output + '\n=&gt;pricerange: ' + $macro.ware.pricerange"/>
+              <set_value name="$output" exact="$output + '\n=&gt;volume: ' + $macro.ware.volume"/>
+              <set_value name="$output" exact="$output + '\n=&gt;waretransport: ' + $macro.ware.waretransport"/>
+              <set_value name="$output" exact="$output + '\n=&gt;transporttag: ' + $macro.ware.transporttag"/>
+              <set_value name="$output" exact="$output + '\n=&gt;buyrestriction.base: ' + $macro.ware.buyrestriction.base"/>
+              <set_value name="$output" exact="$output + '\n=&gt;sellrestriction.base: ' + $macro.ware.sellrestriction.base"/>
+              <set_value name="$output" exact="$output + '\n=&gt;tags: ' + $macro.ware.tags"/>
+              <set_value name="$output" exact="$output + '\n=&gt;objectmacro: ' + $macro.ware.objectmacro  + if $macro.ware.objectmacro.ismacro.{$macro} then '(matches)' else '(DOES NOT MATCH)'"/>
+              <set_value name="$output" exact="$output + '\n=&gt;objectcount: ' + $macro.ware.objectcount"/>
+              <set_value name="$output" exact="$output + '\n=&gt;resources.list (default): ' + $macro.ware.resources.list"/>
+              <set_value name="$output" exact="$output + '\n=&gt;research.precursors.list: ' + $macro.ware.research.precursors.list"/>
+              <set_value name="$output" exact="$output + '\n=&gt;research.resources.list: ' + $macro.ware.research.resources.list"/>
+              
+              <create_position name="$spawnpos" object="player.container" space="player.sector" x="0m" y="0m" z="10km"/>
+              
+              <!-- Create Ship for destruction -->
+              
+              <create_ship name="$WreckShip" macro="$macro" sector="player.sector">
+                <owner exact="faction.player"/>
+                <loadout>
+                  <level exact="1.0"/>
+                  <variation exact="0"/>
+                </loadout>
+                <people >
+                  <fillpercent exact="0"/>
+                </people>
+                <safepos space="player.sector" x="$spawnpos.x" y="$spawnpos.y + 1000m" z="$spawnpos.z"/>
+              </create_ship>
+              <destroy_object object="$WreckShip" explosion="true"/>
+              <!-- create Ship for Testing -->
+              <create_ship name="$TestShip" macro="$macro" sector="player.sector">
+                <owner exact="faction.player"/>
+                <pilot>
+                  <select race="$macro.makerraces" tags="tag.aipilot"/>
+                  
+                  <owner exact="faction.player"/>
+                </pilot>
+                <people >
+                  <fillpercent exact="100"/>
+                  <person role="service">
+                    <select race="$macro.makerraces" tags="tag.crew"/>
+                  </person>
+                </people>
+                <loadout>
+                  <level exact="1.0"/>
+                  <variation exact="0"/>
+                </loadout>
+                <safepos space="player.sector" x="$spawnpos.x" y="$spawnpos.y - 1000m" z="$spawnpos.z"/>
+              </create_ship>
+              <set_value name="$output" exact="$output + '\n\n####################################################\n     Object Data: '"/>
+              <set_value name="$output" exact="$output + '\n=&gt;extension: ' + $TestShip.extension + if $TestShip.isextensionpersonal then '(Personal)' else ''"/>
+              <set_value name="$output" exact="$output + '\n=&gt;class: ' + $TestShip.class"/>
+              <set_value name="$output" exact="$output + '\n=&gt;size: ' + $TestShip.size"/>
+              <set_value name="$output" exact="$output + '\n=&gt;length: ' + $TestShip.length"/>
+              <set_value name="$output" exact="$output + '\n=&gt;height: ' + $TestShip.height"/>
+              <set_value name="$output" exact="$output + '\n=&gt;width: ' + $TestShip.width"/>
+              <!-- relationchange not implemented - too much and probably not that relevant -->
+              <set_value name="$output" exact="$output + '\n=&gt;wares.list: ' + $TestShip.wares.list"/>
+              <set_value name="$output" exact="$output + '\n=&gt;secrecylevel: ' + $TestShip.secrecylevel"/>
+              <set_value name="$output" exact="$output + '\n=&gt;isphysicsready: ' + $TestShip.isphysicsready"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;hull: ' + $TestShip.hull"/>
+              <set_value name="$output" exact="$output + '\n=&gt;maxhull: ' + $TestShip.maxhull"/>
+              <set_value name="$output" exact="$output + '\n=&gt;shield: ' + $TestShip.shield"/>
+              <set_value name="$output" exact="$output + '\n=&gt;maxshield: ' + $TestShip.maxshield"/>
+              <set_value name="$output" exact="$output + '\n=&gt;drop: ' + $TestShip.drop"/>
+              <set_value name="$output" exact="$output + '\n=&gt;canclaimownership: ' + $TestShip.canclaimownership"/>
+              <set_value name="$output" exact="$output + '\n=&gt;hasstorage: ' + $TestShip.hasstorage"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;makerraces: ' + $TestShip.makerraces"/>
+              <set_value name="$output" exact="$output + '\n=&gt;primarypurpose: ' + $TestShip.primarypurpose"/>
+              <set_value name="$output" exact="$output + '\n=&gt;ismilitary: ' + $TestShip.ismilitary"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;threatscore: ' + $TestShip.threatscore"/>
+              <set_value name="$output" exact="$output + '\n=&gt;maxradarrange: ' + $TestShip.maxradarrange"/>
+              <set_value name="$output" exact="$output + '\n=&gt;value: ' + $TestShip.value"/><!-- depends on loaout -->
+              <set_value name="$output" exact="$output + '\n=&gt;buildresourcevalue: ' + $TestShip.buildresourcevalue"/><!-- depends on loaout -->
+              <set_value name="$output" exact="$output + '\n=&gt;numsignalleakslots: ' + $TestShip.numsignalleakslots"/>
+              <set_value name="$output" exact="$output + '\n=&gt;scuttleeffect: ' + $TestShip.scuttleeffect"/>
+              <set_value name="$output" exact="$output + '\n=&gt;isunit: ' + $TestShip.isunit"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;isdeployable: ' + $TestShip.isdeployable"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;accessrestricted: ' + $TestShip.accessrestricted"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;canberecycled: ' + $TestShip.canberecycled"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;isdatavault: ' + $TestShip.isdatavault"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;islandmark: ' + $TestShip.islandmark"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;haswalkableroom: ' + $TestShip.haswalkableroom"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;canhavedynamicinterior: ' + $TestShip.canhavedynamicinterior"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;hasscanner: ' + $TestShip.hasscanner"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;longrange: ' + $TestShip.longrange"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;software.compatible.list: ' + $TestShip.software.compatible.list"/>
+              <set_value name="$output" exact="$output + '\n=&gt;software.default.list: ' + $TestShip.software.default.list"/>
+              <set_value name="$output" exact="$output + '\n=&gt;people.capacity: ' + $TestShip.people.capacity"/><!-- numfreeactorslots -->
+              <set_value name="$output" exact="$output + '\n=&gt;iscapturable: ' + $TestShip.iscapturable"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;shields.numslots: ' + $TestShip.shields.numslots"/>
+              <set_value name="$output" exact="$output + '\n=&gt;turrets.numslots: ' + $TestShip.turrets.numslots"/>
+              <set_value name="$output" exact="$output + '\n=&gt;weapons.numslots: ' + $TestShip.weapons.numslots"/>
+              <set_value name="$output" exact="$output + '\n=&gt;modules.numslots: ' + $TestShip.modules.numslots"/>
+              <set_value name="$output" exact="$output + '\n=&gt;units.maxcount: ' + $TestShip.units.maxcount"/>
+              <set_value name="$output" exact="$output + '\n=&gt;ammostorage.missile.basecapacity: ' + $TestShip.ammostorage.missile.basecapacity"/>
+              <set_value name="$output" exact="$output + '\n=&gt;ammostorage.countermeasure.basecapacity: ' + $TestShip.ammostorage.countermeasure.basecapacity"/>
+              <set_value name="$output" exact="$output + '\n=&gt;ammostorage.deployable.basecapacity: ' + $TestShip.ammostorage.deployable.basecapacity"/>
+              <set_value name="$output" exact="$output + '\n=&gt;haswaveprotection: ' + $TestShip.haswaveprotection"/>
+              <set_value name="$output" exact="$output + '\n=&gt;waretransport: ' + $TestShip.waretransport"/>
+              <!-- ship specific stuff -->
+              <set_value name="$output" exact="$output + '\n=&gt;typename: ' + $TestShip.typename"/>
+              <set_value name="$output" exact="$output + '\n=&gt;numfreeactorslots: ' + $TestShip.numfreeactorslots"/>
+              <set_value name="$output" exact="$output + '\n=&gt;docksize: ' + $TestShip.docksize"/>
+              <set_value name="$output" exact="$output + '\n=&gt;dockslot.name: ' + $TestShip.dockslot.name"/>
+              <set_value name="$output" exact="$output + '\n=&gt;canenterhighway: ' + $TestShip.canenterhighway"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;iscapitalship: ' + $TestShip.iscapitalship"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;islasertower: ' + $TestShip.islasertower"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;issupplyship: ' + $TestShip.issupplyship"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;cantowobjects: ' + $TestShip.cantowobjects"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n=&gt;takesregiondamage: ' + $TestShip.takesregiondamage"/><!-- bool -->
+              
+              <!-- Job/God Data-->
+              <find_object name="$Ships" space="player.galaxy" macro="$macro" multiple="true">
+                <match owner="faction.player" negate="true"/>
+              </find_object>
+              <set_value name="$totalcounts" exact="0"/>
+              <set_value name="$jobcounts" exact="table[]"/>
+              <do_for_each in="$Ships" name="$Ship">
+                <set_value name="$totalcounts" operation="add"/>
+                <set_value name="$jobcounts.{'$'+$Ship.job}" operation="add"/>
+                <set_value name="$jobcounts.{$Ship.owner}" operation="add"/>
+              </do_for_each>
+              
+              <set_value name="$output" exact="$output + '\n\n####################################################\n     Job Data: '"/>
+              <set_value name="$output" exact="$output + '\n=&gt;Job Ships total: ' + $totalcounts"/>
+              <set_value name="$output" exact="$output + '\n=&gt;Job Ships per Faction:'"/>
+              <do_for_each in="lookup.faction.list" name="$faction">
+                <do_if value="$jobcounts.{$faction}?">
+                  <set_value name="$output" exact="$output + '\n' + $faction.name + ' : ' + $jobcounts.{$faction}"/>
+                  <remove_value name="$jobcounts.{$faction}"/>
+                </do_if>
+              </do_for_each>
+              <set_value name="$output" exact="$output + '\n=&gt;Job Ships per Job ID:'"/>
+              <do_for_each in="$jobcounts" name="$jobid" valuename="$count">
+                <set_value name="$output" exact="$output + '\n' + $jobid + ' : ' + $count"/>
+              </do_for_each>
+              
+              <raise_lua_event name="'Chat_Window_API.Print'" param="$output"/>
+              <!--debug_text filter="general" text="$output"/-->
+              <debug_to_file directory="'ut_console'" name="$macro.id+' report.txt'" text="$output" append="false"/>
+            </do_if>
+            <do_else>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'Error: macro for ' + $terms.{2} + ' not found'"/>
+            </do_else>
+          </actions>
+          <cues>
+            <cue name="RotatePaintjob" checkinterval="$paintcycletime" instantiate="true">
+              <actions>
+                <set_value name="$paintcount" operation="add"/>
+                <do_if value="$paintcount gt $paintmods.count">
+                  <set_value name="$paintcount" exact="1"/>
+                </do_if>
+                <add_paint_mod object="$WreckShip" ware="$paintmods.{$paintcount}"/>
+                <add_paint_mod object="$TestShip" ware="$paintmods.{$paintcount}"/>
+              </actions>
+            </cue>
+            <cue name="Cleanup">
+              <conditions>
+                <event_object_destroyed object="$TestShip"/>
+              </conditions>
+              <actions>
+                <cancel_cue cue="this.parent"/>
               </actions>
             </cue>
           </cues>
