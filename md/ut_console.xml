@@ -13,18 +13,240 @@
         <set_value name="$debugmode" exact="false"/>
         <set_value name="$console_vars" exact="table[]"/>
         <!-- aligned Lists: output stores the console output, type stores what kind of message it was for future filtering-->
-        <!-- possible values: command , command_hot , command_out debug_out -->
+        <!-- possible values: command , command_hot , command_out , debug_out -->
         <set_value name="$console_history_output" exact="[]"/>
         <set_value name="$console_history_type" exact="[]"/>
         <set_value name="$usage_stage" exact="0" comment="0 = never used(called), 1=read commands only, 2=safe writes/actions only, 3=anything"/>
       </actions>
       <cues>
+        <cue name="UnlockConsole" comment="the potentially dangerous commands are locked behind here. The command itself wont set the usage stage to 3, but any command inside will.">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'unlock'"/>
+            <debug_text filter="general" text="'Eval triggered' + event.param3"/>
+          </conditions>
+          <actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="'All Console Commands unlocked! This includes the Commands that can break our game!\nIf you use them your Save will be marked accordingly. There will be no further Warnings!'"/>
+          </actions>
+          <cues>
+        <cue name="SetVal" instantiate="true">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'setval'"/>
+            <debug_text filter="general" text="'SetVal triggered' + event.param3"/>
+          </conditions>
+          <actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'"/>
+            <signal_cue_instantly cue="ShowMarker" param="3"/>
+            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'eval [h(elp)] $propertychain_set $propertychain_get\nEvaluates $propertychain_get and writes the result to $propertychain_set. In case one of the chains cannt be resolved entirely it will error out with the last valid Value and a list of the remaining properties.'"/>
+            <include_actions ref="PrintHelpAndUnpackTerms"/>
+            <!-- get root and final property, and evaluate property chain to the second-to-last, then as last step set final property -->
+            <set_value name="$Set_pchain" exact="$terms_converted.{2}"/>
+            <set_value name="$Get_pchain" exact="$terms_converted.{3}"/>
+            <set_value name="$Get2_pchain" exact="@$terms_converted.{4}"/>
+            <set_value name="$abortreason" exact="null"/>
+            <!-- first get the values we want to save, as very first the optional second value -->
+            <do_if value="$Get2_pchain != null">
+              <run_actions ref="EvaluatePropertyFromRoot" result="$Get2Value">
+                <param name="pchain" value="$Get2_pchain"/>
+                <param name="ListOutput" value="false"/>
+              </run_actions>
+              <do_if value="$Get2Value == 'error'">
+                <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Get2 Term not found - aborting.'"/>
+              </do_if>
+            </do_if>
+            <do_else>
+              <set_value name="$Get2Value" exact="null" comment="second value is rarely needed. assuming it isnt needed here, but we want to pass both for simplicity."/>
+            </do_else>
+            
+            <!-- Next the non-optional Value to set - note: take care to handle null values to be able to clear stutff!! -->
+            <run_actions ref="EvaluatePropertyFromRoot" result="$GetValue">
+              <param name="pchain" value="$Get_pchain"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <do_if value="$GetValue == 'error'">
+              <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Get Term not found - aborting.'"/>
+            </do_if>
+            
+            
+            <!-- Some Special Handling needed in case of certain root properties or end values - ToDo !! -->
+            <!-- Seperating ot the final property to set, since it is needed for setting, but doesnt have to be valuated -->
+            <set_value name="$SetProperty" exact="$Set_pchain.{$Set_pchain.count}"/>
+            <remove_value name="$Set_pchain.{$Set_pchain.count}"/>
+            <run_actions ref="EvaluatePropertyFromRoot" result="$SetValue">
+              <param name="pchain" value="$Set_pchain"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <do_if value="$SetValue == 'error'">
+              <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Set Term not found - aborting.'"/>
+            </do_if>
+            
+            <!-- We got all the Values we needed for the Action - perform it!-->
+            <do_if value="$abortreason == null">
+              <run_actions ref="SaveProperty" result="$FinalValue">
+                <param name="Property" value="$SetProperty"/>
+                <param name="PropertyValue" value="$SetValue"/>
+                <param name="ListOutput" value="false"/>
+                <param name="SaveValue" value="$GetValue"/>
+                <param name="SaveValue2" value="$Get2Value"/>
+              </run_actions>
+            </do_if>
+            <do_if value="$abortreason != null">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="$abortreason"/>
+            </do_if>
+            <do_elseif value="$FinalValue == 'Fictious Property'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - cannot confirm since its not property-accessible'.[$SetValue,$SetProperty,$GetValue,$Get2Value]"/>
+            </do_elseif>
+            <do_elseif value="$FinalValue ==  $GetValue">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - success'.[$SetValue,$SetProperty,$GetValue,$Get2Value]"/>
+            </do_elseif>
+            <do_else>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - failure, result is actually %s'.[$SetValue,$SetProperty,$GetValue,$Get2Value,$FinalValue]"/>
+            </do_else>
+          </actions>
+        </cue>
+        <cue name="CueManager" instantiate="true" namespace="this">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'cue'"/>
+          </conditions>
+          <actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'" chance="Root.$debugmode * 100"/>
+            <signal_cue_instantly cue="ShowMarker" param="3"/>
+            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'info [h(elp)] $action$ $cue$\nCan force Cues into certain states. possible actions:\nstate: returns the cue state (harmless, but prefer eval for this)\ncancel: cancels the cue and its sub-cues\nreset: resets the cue and its sub-cues\ncomplete: marks the cue as completed\nforce: will force a cue to trigger\nsignal: signals the cue; if there is another param it will signal instantly with that.'"/>
+            <include_actions ref="PrintHelpAndUnpackTerms"/>
+            <!-- get cue -->
+            <run_actions ref="EvaluatePropertyFromRoot" result="$Cue">
+              <param name="pchain" value="$terms_converted.{3}"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <!-- perform action -->
+            <do_if value="$Cue.exists">
+              <do_if value="$terms.{2}" exact="'state'">
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'%s state is : %s'.[$Cue.name,$Cue.state]"/>
+              </do_if>
+              <do_elseif value="$terms.{2}" exact="'cancel'">
+                <cancel_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Cancel\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+              </do_elseif>
+              <do_elseif value="$terms.{2}" exact="'reset'">
+                <reset_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Reset\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+              </do_elseif>
+              <do_elseif value="$terms.{2}" exact="'complete'">
+                <complete_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Complete\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+              </do_elseif>
+              <do_elseif value="$terms.{2}" exact="'force'">
+                <force_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Force\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+              </do_elseif>
+              <do_elseif value="$terms.{2}" exact="'signal'">
+                <do_if value="not $terms.{4}?">
+                  <signal_cue cue="$Cue"/>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Signal\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
+                </do_if>
+                <do_else>
+                  <run_actions ref="EvaluatePropertyFromRoot" result="$Param">
+                    <param name="pchain" value="$terms_converted.{3}"/>
+                    <param name="ListOutput" value="false"/>
+                  </run_actions>
+                  <signal_cue_instantly cue="$Cue" param="$Param"/>
+                  <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Signal instantly with param %s\n%s state was : %s'.[$Param,$Cue.name,$Cue.state]"/>
+                </do_else>
+              </do_elseif>
+            </do_if>
+          </actions>
+        </cue>
+        <cue name="DestroyObject" instantiate="true" namespace="this">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'destroy'"/>
+          </conditions>
+          <actions>
+            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'" chance="Root.$debugmode * 100"/>
+            <signal_cue_instantly cue="ShowMarker" param="1"/>
+            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'info [h(elp)] $object$\nDestroys the Target Object after confirmation. Stricter Confirmation requirement if Target Object is invulnearable.'"/>
+            <include_actions ref="PrintHelpAndUnpackTerms"/>
+            <do_if value="$terms.count ge 2">
+              <do_if value="$terms.indexof.{'noexplosion'}">
+                <set_value name="$explosion" exact="false"/>
+                <remove_value name="$terms.{$terms.indexof.{'noexplosion'}}"/>
+              </do_if>
+              <do_else>
+                <set_value name="$explosion" exact="true"/>
+              </do_else>
+              <!-- Get Object from Term Number 2 -->
+              <run_actions ref="EvaluatePropertyFromRoot" result="$object">
+                <param name="pchain" value="$terms_converted.{2}"/>
+                <param name="ListOutput" value="false"/>
+              </run_actions>
+              <do_if value="(typeof $object).isnumeric" comment="convert in case the input was a single number">
+                <set_value name="$object" exact="component.{$object}"/>
+              </do_if>
+              <do_if value="$object.exists">
+                <do_if value="player.entity.hascontext.{$object}">
+                  <set_value name="$confirmcodes" exact="['YesIWantToDie']"/>
+                </do_if>
+                <do_elseif value="$object.isindestructible or $object.isinvulnerable">
+                  <set_value name="$confirmcodes" exact="[['Yes','yEs','yeS','YEs','yES','YeS'].random]"/>
+                </do_elseif>
+                <do_else>
+                  <set_value name="$confirmcodes" exact="['y','Y','yes','YES']"/>
+                </do_else>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'Destroy %s // %s? Type in %s to confirm. Any other Input will abort without further feedback.'.[$object.knownname,$object.idcode,$confirmcodes]"/>
+              </do_if>
+              <do_else>
+                <cancel_cue cue="this"/>
+              </do_else>
+            </do_if>
+          </actions>
+          <cues>
+            <cue name="DestroyObject_confirm">
+              <conditions>
+                <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+              </conditions>
+              <actions>
+                <do_if value="$confirmcodes.indexof.{event.param3.$text}">
+                  <do_if value="$object.isindestructible or $object.isinvulnerable or player.entity.hascontext.{$object}">
+                    <do_if value="if player.entity.hascontext.{$object} then $confirmcodes.{1} == 'YesIWantToDie' else $confirmcodes.count == 1">
+                      <signal_cue_instantly cue="ShowMarker" param="3"/>
+                      <!--set_object_min_hull object="$object" exact="0"/>
+                      <set_object_min_shield object="$object" exact="0"/-->
+                      <do_if value="$noexplosion">
+                        <destroy_object object="$object" explosion="false"/>
+                      </do_if>
+                      <do_else>
+                        <destroy_object object="$object" explosion="true"/>
+                      </do_else>
+                    </do_if>
+                    <do_else>
+                      <raise_lua_event name="'Chat_Window_API.Print'" param="'Target gained invulnearability since destroy command was issued - repeat command!'"/>
+                    </do_else>
+                  </do_if>
+                  <do_else>
+                    <signal_cue_instantly cue="ShowMarker" param="2"/>
+                    <do_if value="$noexplosion">
+                      <destroy_object object="$object" explosion="false"/>
+                    </do_if>
+                    <do_else>
+                      <destroy_object object="$object" explosion="true"/>
+                    </do_else>
+                  </do_else>
+                </do_if>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+          </cues>
+        </cue>
         <cue name="ShowMarker" instantiate="true">
           <conditions>
             <check_any>
               <event_cue_signalled/>
               <event_game_loaded/>
               <event_cue_cancelled cue="ProtectMarker"/>
+              <event_player_build_added/>
             </check_any>
           </conditions>
           <actions>
@@ -32,7 +254,6 @@
               <do_if value="event.param gt $usage_stage">
                 <set_value name="$usage_stage" exact="event.param"/>
                 <set_value name="$playername" exact="'forced update'"/>
-                <set_value name="$playerdescription" exact="'forced update'"/>
               </do_if>
             </do_if>
             <do_elseif value="event.name" exact="'event_cue_cancelled'">
@@ -50,18 +271,6 @@
               <set_value name="$playername" exact="$marker + $playername"/>
               <set_object_name object="player.entity" name="$playername"/>
             </do_if>
-            <!--do_if value="player.description != $playerdescription">
-              <!- - clear traces of Markers from name, and apply a new marker - ->
-              <substitute_text text="$playerdescription" source="player.description">
-                <replace string="'\033G#'" with="''"/>
-                <replace string="'\033Y#'" with="''"/>
-                <replace string="'\033R#'" with="''"/>
-                <replace string="'\033Z#'" with="''"/>
-              </substitute_text>
-              <set_value name="$playerdescription" exact="$marker + $playerdescription"/>
-              <set_object_description object="player" description="$playerdescription"/>
-            </do_if-->
-            
           </actions>
         </cue>
         <cue name="Chatwindow_Feedback" instantiate="true">
@@ -196,82 +405,6 @@
             </do_all>
           </actions>
         </cue>
-        <cue name="SetVal" instantiate="true">
-          <conditions>
-            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
-            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'setval'"/>
-            <debug_text filter="general" text="'SetVal triggered' + event.param3"/>
-          </conditions>
-          <actions>
-            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'"/>
-            <signal_cue_instantly cue="ShowMarker" param="3"/>
-            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'eval [h(elp)] $propertychain_set $propertychain_get\nEvaluates $propertychain_get and writes the result to $propertychain_set. In case one of the chains cannt be resolved entirely it will error out with the last valid Value and a list of the remaining properties.'"/>
-            <include_actions ref="PrintHelpAndUnpackTerms"/>
-            <!-- get root and final property, and evaluate property chain to the second-to-last, then as last step set final property -->
-            <set_value name="$Set_pchain" exact="$terms_converted.{2}"/>
-            <set_value name="$Get_pchain" exact="$terms_converted.{3}"/>
-            <set_value name="$Get2_pchain" exact="@$terms_converted.{4}"/>
-            <set_value name="$abortreason" exact="null"/>
-            <!-- first get the values we want to save, as very first the optional second value -->
-            <do_if value="$Get2_pchain != null">
-              <run_actions ref="EvaluatePropertyFromRoot" result="$Get2Value">
-                <param name="pchain" value="$Get2_pchain"/>
-                <param name="ListOutput" value="false"/>
-              </run_actions>
-              <do_if value="$Get2Value == 'error'">
-                <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Get2 Term not found - aborting.'"/>
-              </do_if>
-            </do_if>
-            <do_else>
-              <set_value name="$Get2Value" exact="null" comment="second value is rarely needed. assuming it isnt needed here, but we want to pass both for simplicity."/>
-            </do_else>
-            
-            <!-- Next the non-optional Value to set - note: take care to handle null values to be able to clear stutff!! -->
-            <run_actions ref="EvaluatePropertyFromRoot" result="$GetValue">
-              <param name="pchain" value="$Get_pchain"/>
-              <param name="ListOutput" value="false"/>
-            </run_actions>
-            <do_if value="$GetValue == 'error'">
-              <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Get Term not found - aborting.'"/>
-            </do_if>
-            
-            
-            <!-- Some Special Handling needed in case of certain root properties or end values - ToDo !! -->
-            <!-- Seperating ot the final property to set, since it is needed for setting, but doesnt have to be valuated -->
-            <set_value name="$SetProperty" exact="$Set_pchain.{$Set_pchain.count}"/>
-            <remove_value name="$Set_pchain.{$Set_pchain.count}"/>
-            <run_actions ref="EvaluatePropertyFromRoot" result="$SetValue">
-              <param name="pchain" value="$Set_pchain"/>
-              <param name="ListOutput" value="false"/>
-            </run_actions>
-            <do_if value="$SetValue == 'error'">
-              <set_value name="$abortreason" exact="$Get_pchain + ' - Final Property of Set Term not found - aborting.'"/>
-            </do_if>
-            
-            <!-- We got all the Values we needed for the Action - perform it!-->
-            <do_if value="$abortreason == null">
-              <run_actions ref="SaveProperty" result="$FinalValue">
-                <param name="Property" value="$SetProperty"/>
-                <param name="PropertyValue" value="$SetValue"/>
-                <param name="ListOutput" value="false"/>
-                <param name="SaveValue" value="$GetValue"/>
-                <param name="SaveValue2" value="$Get2Value"/>
-              </run_actions>
-            </do_if>
-            <do_if value="$abortreason != null">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="$abortreason"/>
-            </do_if>
-            <do_elseif value="$FinalValue == 'Fictious Property'">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - cannot confirm since its not property-accessible'.[$SetValue,$SetProperty,$GetValue,$Get2Value]"/>
-            </do_elseif>
-            <do_elseif value="$FinalValue ==  $GetValue">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - success'.[$SetValue,$SetProperty,$GetValue,$Get2Value]"/>
-            </do_elseif>
-            <do_else>
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'Set Property %s.%s to %s (secondary %s) - failure, result is actually %s'.[$SetValue,$SetProperty,$GetValue,$Get2Value,$FinalValue]"/>
-            </do_else>
-          </actions>
-        </cue>
         <cue name="PerformAction" instantiate="true" namespace="this" comment="collection of small actions that doesnt need much logic">
           <conditions><!-- ALL IMPLEMENTED COMMANDS MUST BE LISTED IN HERE!!! -->
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
@@ -328,86 +461,7 @@
             </do_if>
           </actions>
         </cue>
-        <cue name="DestroyObject" instantiate="true" namespace="this">
-          <conditions>
-            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
-            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'destroy'"/>
-          </conditions>
-          <actions>
-            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'" chance="Root.$debugmode * 100"/>
-            <signal_cue_instantly cue="ShowMarker" param="1"/>
-            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'info [h(elp)] $object$\nDestroys the Target Object after confirmation. Stricter Confirmation requirement if Target Object is invulnearable.'"/>
-            <include_actions ref="PrintHelpAndUnpackTerms"/>
-            <do_if value="$terms.count ge 2">
-              <do_if value="$terms.indexof.{'noexplosion'}">
-                <set_value name="$explosion" exact="false"/>
-                <remove_value name="$terms.{$terms.indexof.{'noexplosion'}}"/>
-              </do_if>
-              <do_else>
-                <set_value name="$explosion" exact="true"/>
-              </do_else>
-              <!-- Get Object from Term Number 2 -->
-              <run_actions ref="EvaluatePropertyFromRoot" result="$object">
-                <param name="pchain" value="$terms_converted.{2}"/>
-                <param name="ListOutput" value="false"/>
-              </run_actions>
-              <do_if value="(typeof $object).isnumeric" comment="convert in case the input was a single number">
-                <set_value name="$object" exact="component.{$object}"/>
-              </do_if>
-              <do_if value="$object.exists">
-                <do_if value="player.entity.hascontext.{$object}">
-                  <set_value name="$confirmcodes" exact="['YesIWantToDie']"/>
-                </do_if>
-                <do_elseif value="$object.isindestructible or $object.isinvulnerable">
-                  <set_value name="$confirmcodes" exact="[['Yes','yEs','yeS','YEs','yES','YeS'].random]"/>
-                </do_elseif>
-                <do_else>
-                  <set_value name="$confirmcodes" exact="['y','Y','yes','YES']"/>
-                </do_else>
-                <raise_lua_event name="'Chat_Window_API.Print'" param="'Destroy %s // %s? Type in %s to confirm. Any other Input will abort without further feedback.'.[$object.knownname,$object.idcode,$confirmcodes]"/>
-              </do_if>
-              <do_else>
-                <cancel_cue cue="this"/>
-              </do_else>
-            </do_if>
-          </actions>
-          <cues>
-            <cue name="DestroyObject_confirm">
-              <conditions>
-                <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
-              </conditions>
-              <actions>
-                <do_if value="$confirmcodes.indexof.{event.param3.$text}">
-                  <do_if value="$object.isindestructible or $object.isinvulnerable or player.entity.hascontext.{$object}">
-                    <do_if value="if player.entity.hascontext.{$object} then $confirmcodes.{1} == 'YesIWantToDie' else $confirmcodes.count == 1">
-                      <signal_cue_instantly cue="ShowMarker" param="3"/>
-                      <!--set_object_min_hull object="$object" exact="0"/>
-                      <set_object_min_shield object="$object" exact="0"/-->
-                      <do_if value="$noexplosion">
-                        <destroy_object object="$object" explosion="false"/>
-                      </do_if>
-                      <do_else>
-                        <destroy_object object="$object" explosion="true"/>
-                      </do_else>
-                    </do_if>
-                    <do_else>
-                      <raise_lua_event name="'Chat_Window_API.Print'" param="'Target gained invulnearability since destroy command was issued - repeat command!'"/>
-                    </do_else>
-                  </do_if>
-                  <do_else>
-                    <signal_cue_instantly cue="ShowMarker" param="2"/>
-                    <do_if value="$noexplosion">
-                      <destroy_object object="$object" explosion="false"/>
-                    </do_if>
-                    <do_else>
-                      <destroy_object object="$object" explosion="true"/>
-                    </do_else>
-                  </do_else>
-                </do_if>
-              </actions>
-            </cue>
-          </cues>
-        </cue>
+
         <cue name="CheckShip" instantiate="true" namespace="this">
           <conditions>
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
@@ -512,6 +566,43 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
               
               <create_position name="$spawnpos" object="player.container" space="player.sector" x="0m" y="0m" z="10km"/>
               
+              <!-- Job/God Data-->
+              <find_object name="$Ships" space="player.galaxy" macro="$macro" multiple="true">
+                <match owner="faction.player" negate="true"/>
+              </find_object>
+              <set_value name="$totalcounts" exact="0"/>
+              <set_value name="$jobcounts" exact="table[]"/>
+              <do_for_each in="$Ships" name="$Ship">
+                <set_value name="$totalcounts" operation="add"/>
+                <set_value name="$jobcounts.{'$'+$Ship.job}" operation="add"/>
+                <set_value name="$jobcounts.{$Ship.owner}" operation="add"/>
+              </do_for_each>
+              
+              <set_value name="$output" exact="$output + '\n\n####################################################\n     Job Data: '"/>
+              <set_value name="$output" exact="$output + '\n=&gt;Job Ships total: ' + $totalcounts"/>
+              <set_value name="$output" exact="$output + '\n=&gt;Job Ships per Faction:'"/>
+              <set_value name="$faction_list" exact="[]"/>
+              <do_for_each in="lookup.faction.list" name="$faction">
+                <do_if value="$jobcounts.{$faction}?">
+                  <set_value name="$output" exact="$output + '\n' + $faction.name + ' : ' + $jobcounts.{$faction}"/>
+                  <remove_value name="$jobcounts.{$faction}"/>
+                  <append_to_list name="$faction_list" exact="$faction"/>
+                </do_if>
+              </do_for_each>
+              <set_value name="$output" exact="$output + '\n=&gt;Job Ships per Job ID:'"/>
+              <do_for_each in="$jobcounts" name="$jobid" valuename="$count">
+                <set_value name="$output" exact="$output + '\n' + $jobid + ' : ' + $count"/>
+              </do_for_each>
+              
+              <find_station name="$Sellers" space="player.galaxy" canbuildmacro="$macro" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;Ship is being built/sold at:'"/>
+              <do_for_each in="$Sellers" name="$Seller">
+                <set_value name="$output" exact="$output + '\n' + $Seller.debugname + ' in ' + $Seller.cluster.knownname"/>
+                <do_if value="$faction_list.indexof.{$Seller.owner} == 0">
+                  <append_to_list name="$faction_list" exact="$Seller.owner"/>
+                </do_if>
+              </do_for_each>
+              
               <!-- Create Ship for destruction -->
               
               <create_ship name="$WreckShip" macro="$macro" sector="player.sector">
@@ -541,7 +632,7 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
                   </person>
                 </people>
                 <loadout>
-                  <level exact="1.0"/>
+                  <level exact="1.0" faction="$faction_list"/>
                   <variation exact="0"/>
                 </loadout>
                 <safepos space="player.sector" x="$spawnpos.x" y="$spawnpos.y - 1000m" z="$spawnpos.z"/>
@@ -608,32 +699,38 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
               <set_value name="$output" exact="$output + '\n=&gt;issupplyship: ' + $TestShip.issupplyship"/><!-- bool -->
               <set_value name="$output" exact="$output + '\n=&gt;cantowobjects: ' + $TestShip.cantowobjects"/><!-- bool -->
               <set_value name="$output" exact="$output + '\n=&gt;takesregiondamage: ' + $TestShip.takesregiondamage"/><!-- bool -->
+              <set_value name="$output" exact="$output + '\n\n####################################################\n     Experimental Data: '"/>
+              <find_npc_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;npc_slot count: ' + $tmp.count"/>
+              <find_crate_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;crate_slot count: ' + $tmp.count"/>
+              <find_prop_slot name="$tmp" room="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;prop_slot count: ' + $tmp.count"/>
+              <find_player_transporter_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;player_transporter_slot count: ' + $tmp.count"/>
+              <find_shipworkbench_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;shipworkbench_slot count: ' + $tmp.count"/>
+              <find_inventoryworkbench_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;inventoryworkbench_slot count: ' + $tmp.count"/>
+              <find_shipconsole_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;shipconsole_slot count: ' + $tmp.count"/>
+              <find_ventureconsole_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;ventureconsole_slot count: ' + $tmp.count"/>
+              <find_inventoryconsole_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;inventoryconsole_slot count: ' + $tmp.count"/>
+              <find_hack_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;hack_slot count: ' + $tmp.count"/>
+              <find_airlock_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;airlock_slot count: ' + $tmp.count"/>
+              <find_mapconsole_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;mapconsole_slot count: ' + $tmp.count"/>
+              <find_stationeditor_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;stationeditor_slot count: ' + $tmp.count"/>
+              <find_scenarioconsole_slot name="$tmp" object="$TestShip" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;scenarioconsole_slot count: ' + $tmp.count"/>
+              <find_connected_macro name="$tmp" macro="$macro" multiple="true"/>
+              <set_value name="$output" exact="$output + '\n=&gt;connected_macro count: ' + $tmp.count"/>
               
-              <!-- Job/God Data-->
-              <find_object name="$Ships" space="player.galaxy" macro="$macro" multiple="true">
-                <match owner="faction.player" negate="true"/>
-              </find_object>
-              <set_value name="$totalcounts" exact="0"/>
-              <set_value name="$jobcounts" exact="table[]"/>
-              <do_for_each in="$Ships" name="$Ship">
-                <set_value name="$totalcounts" operation="add"/>
-                <set_value name="$jobcounts.{'$'+$Ship.job}" operation="add"/>
-                <set_value name="$jobcounts.{$Ship.owner}" operation="add"/>
-              </do_for_each>
-              
-              <set_value name="$output" exact="$output + '\n\n####################################################\n     Job Data: '"/>
-              <set_value name="$output" exact="$output + '\n=&gt;Job Ships total: ' + $totalcounts"/>
-              <set_value name="$output" exact="$output + '\n=&gt;Job Ships per Faction:'"/>
-              <do_for_each in="lookup.faction.list" name="$faction">
-                <do_if value="$jobcounts.{$faction}?">
-                  <set_value name="$output" exact="$output + '\n' + $faction.name + ' : ' + $jobcounts.{$faction}"/>
-                  <remove_value name="$jobcounts.{$faction}"/>
-                </do_if>
-              </do_for_each>
-              <set_value name="$output" exact="$output + '\n=&gt;Job Ships per Job ID:'"/>
-              <do_for_each in="$jobcounts" name="$jobid" valuename="$count">
-                <set_value name="$output" exact="$output + '\n' + $jobid + ' : ' + $count"/>
-              </do_for_each>
               
               <raise_lua_event name="'Chat_Window_API.Print'" param="'Output File is ' + 'ut_console/' + $macro.id + ' report.txt'"/>
               <!--debug_text filter="general" text="$output"/-->
@@ -693,6 +790,8 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
               <set_value name="$DestinationObject" exact="component.{$DestinationObject}"/>
             </do_if>
             
+            <do_if value="$terms_converted.{2}.count == 0 and $terms_converted.{3}.count == 0">
+            
             <do_if value="$DestinationObject.isclass.cluster or $DestinationObject.isclass.galaxy">
               <find_sector name="$DestinationSector" space="$DestinationObject"/>
               <create_position name="$DestinationPos" x="0" y="0" z="0"/>
@@ -712,6 +811,10 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
             <warp object="$WarpObject" sector="$DestinationSector">
               <safepos value="$DestinationPos"/>
             </warp>
+            </do_if>
+            <do_else>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'there was an error in one of the property chains'" chance="Root.$debugmode * 100"/>
+            </do_else>
           </actions>
         </cue>
         <cue name="Debugmode" instantiate="true">
@@ -729,59 +832,6 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
             </do_else>
             <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Enabled'" chance="$debugmode * 100"/>
             <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Disabled'" chance="(not $debugmode) * 100"/>
-          </actions>
-        </cue>
-        <cue name="CueManager" instantiate="true" namespace="this">
-          <conditions>
-            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
-            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'cue'"/>
-          </conditions>
-          <actions>
-            <raise_lua_event name="'Chat_Window_API.Print'" param="this.name + ' Triggered'" chance="Root.$debugmode * 100"/>
-            <signal_cue_instantly cue="ShowMarker" param="3"/>
-            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'info [h(elp)] $action$ $cue$\nCan force Cues into certain states. possible actions:\nstate: returns the cue state (harmless, but prefer eval for this)\ncancel: cancels the cue and its sub-cues\nreset: resets the cue and its sub-cues\ncomplete: marks the cue as completed\nforce: will force a cue to trigger\nsignal: signals the cue; if there is another param it will signal instantly with that.'"/>
-            <include_actions ref="PrintHelpAndUnpackTerms"/>
-            <!-- get cue -->
-            <run_actions ref="EvaluatePropertyFromRoot" result="$Cue">
-              <param name="pchain" value="$terms_converted.{3}"/>
-              <param name="ListOutput" value="false"/>
-            </run_actions>
-            <!-- perform action -->
-            <do_if value="$Cue.exists">
-              <do_if value="$terms.{2}" exact="'state'">
-                <raise_lua_event name="'Chat_Window_API.Print'" param="'%s state is : %s'.[$Cue.name,$Cue.state]"/>
-              </do_if>
-              <do_elseif value="$terms.{2}" exact="'cancel'">
-                <cancel_cue cue="$Cue"/>
-                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Cancel\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
-              </do_elseif>
-              <do_elseif value="$terms.{2}" exact="'reset'">
-                <reset_cue cue="$Cue"/>
-                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Reset\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
-              </do_elseif>
-              <do_elseif value="$terms.{2}" exact="'complete'">
-                <complete_cue cue="$Cue"/>
-                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Complete\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
-              </do_elseif>
-              <do_elseif value="$terms.{2}" exact="'force'">
-                <force_cue cue="$Cue"/>
-                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Force\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
-              </do_elseif>
-              <do_elseif value="$terms.{2}" exact="'signal'">
-                <do_if value="not $terms.{4}?">
-                  <signal_cue cue="$Cue"/>
-                <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Signal\n%s state was : %s'.[$Cue.name,$Cue.state]"/>
-                </do_if>
-                <do_else>
-                  <run_actions ref="EvaluatePropertyFromRoot" result="$Param">
-                    <param name="pchain" value="$terms_converted.{3}"/>
-                    <param name="ListOutput" value="false"/>
-                  </run_actions>
-                  <signal_cue_instantly cue="$Cue" param="$Param"/>
-                  <raise_lua_event name="'Chat_Window_API.Print'" param="'Performed Signal instantly with param %s\n%s state was : %s'.[$Param,$Cue.name,$Cue.state]"/>
-                </do_else>
-              </do_elseif>
-            </do_if>
           </actions>
         </cue>
         <cue name="ProtectMarker" instantiate="true">
@@ -829,7 +879,9 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
               <param name="pchain" value="$pchain"/>
             </run_actions>
             <do_if value="(typeof $rootProperty).isnumeric and $pchain.count">
-              <set_value name="$rootProperty" exact="component.{$rootProperty}"/>
+              <do_if value="@component.{$rootProperty}.exists">
+                <set_value name="$rootProperty" exact="component.{$rootProperty}"/>
+              </do_if>
             </do_if>
             <do_elseif value="$rootProperty == 'error' or $rootProperty == null or $pchain.count == 0">
               <do_if value="$ListOutput">
@@ -846,6 +898,17 @@ You can also specify a Crew Skill level (in Starts) and one or more Paintmods to
               <param name="PropertyValue" value="$rootProperty"/>
               <param name="ListOutput" value="$ListOutput"/>
             </run_actions>
+            <do_if value="$returnValue" exact="'error'">
+              <do_if value="$ListOutput">
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'1st chain element failed; returning:' +  $rootProperty + ' unchanged as list'" chance="Root.$debugmode * 100"/>
+                <return value="[$rootProperty]"/>
+              </do_if>
+              <do_else>
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'1st chain element failed; returning:' + $rootProperty + ' unchanged'" chance="Root.$debugmode * 100"/>
+                <return value="$rootProperty"/>
+              </do_else>
+            
+            </do_if>
             <raise_lua_event name="'Chat_Window_API.Print'" param="'returning: ' + $returnValue" chance="Root.$debugmode * 100"/>
             <return value="$returnValue"/>
           </actions>
@@ -1405,15 +1468,27 @@ player. => currently implemented as kind of global properties - have to improve 
               <return value="$PropertyValue"/>
             </do_if>
             <set_value name="$currentProperty" exact="$PropertyList.{1}"/>
-            <do_if value="false" comment="special handling properties, written by hand">
+            <set_value name="$properties_to_remove" exact="1"/>
+            <do_if value="false" comment="special handling properties, written by hand"/>
+<!-- convert current value (to integer, float, object )-->
+<do_elseif value="$currentProperty == 'cv:i'"><set_value name="$resultValue" exact="($PropertyValue)i"/></do_elseif>
+<do_elseif value="$currentProperty == 'cv:f'"><set_value name="$resultValue" exact="($PropertyValue)f"/></do_elseif>
+<do_elseif value="$currentProperty == 'cv:component'"><set_value name="$resultValue" exact="component.{$PropertyValue}"/></do_elseif>
+<!-- read entry from list / table -->
+<do_elseif value="$currentProperty == 'rl' or $currentProperty == 'rt' or $currentProperty == 'rg'" comment="as in 'readlist' or 'readtable' or 'readgroup'">
+  <set_value name="$resultValue" exact="$PropertyValue.{$PropertyList.{2}}"/>
+  <set_value name="$properties_to_remove" exact="2"/>
+</do_elseif>
+<do_elseif value="$currentProperty == 'comp'" comment="hack; adding proper function later">
+  <set_value name="$resultValue" exact="$PropertyValue == $PropertyList.{2}"/>
+  <set_value name="$properties_to_remove" exact="2"/>
+  <set_value name="$null_is_valid"/>
+</do_elseif>
             
-            </do_if>
-            <do_else comment="standard handling properties, Generated from the scriptproperties ">
             <!-- How it was generated: first filter the scriptproperties.xml with this XPath:
 //property[not(contains(@name, '.')) and not(contains(@name, '<')) and not(contains(@name, '{')) and not(contains(@name, '@'))]/@name
 and then use libreofice calc to fill in the do_elseif, removing dupes
 -->
-<do_if value="false" comment="just that the rest can be pasted in"/>
 <do_elseif value="$currentProperty == 'exists'"><set_value name="$resultValue" exact="$PropertyValue.exists"/></do_elseif>
 <do_elseif value="$currentProperty == 'isoperational'"><set_value name="$resultValue" exact="$PropertyValue.isoperational"/></do_elseif>
 <do_elseif value="$currentProperty == 'iswreck'"><set_value name="$resultValue" exact="$PropertyValue.iswreck"/></do_elseif>
@@ -2357,12 +2432,15 @@ and then use libreofice calc to fill in the do_elseif, removing dupes
 
 <!-- Would love if this method worked, but it doesnt.. leaving it here as fallback in case it does in the future... -->
 <do_else><set_value name="$resultValue" exact="$PropertyValue.{$currentProperty}"/></do_else>
-            </do_else>
             
 <!-- Recursive Call and Return Result Logic - Intended to return the last valid result, or a list of all in-between results.
 In case of Error $PropertyList will contain all non-evaluated properties. Also the Return list will contain the un-evaluated ones as String. -->
-            <do_if value="$resultValue != null">
+            <do_if value="$resultValue != null or $null_is_valid">
+              <remove_value name="$null_is_valid"/>
               <remove_value name="$PropertyList.{1}"/>
+              <do_if value="$properties_to_remove" exact="2">
+                <remove_value name="$PropertyList.{2}"/>
+              </do_if>
               <do_if value="$PropertyList.count">
                 <run_actions ref="EvaluateProperty" result="$returnValue">
                   <param name="PropertyList" value="$PropertyList"/>
