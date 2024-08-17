@@ -943,8 +943,8 @@ player. => currently implemented as kind of global properties - have to improve 
               <return value="$returnValue"/>
             </do_elseif>
             <do_elseif value="$root_term" exact="'null'"><remove_value name="$pchain.{1}"/><return value="null"/></do_elseif>
-            <do_elseif value="$root_term" exact="'true'"><remove_value name="$pchain.{1}"/><return value="0"/></do_elseif>
-            <do_elseif value="$root_term" exact="'false'"><remove_value name="$pchain.{1}"/><return value="1"/></do_elseif>
+            <do_elseif value="$root_term" exact="'true'"><remove_value name="$pchain.{1}"/><return value="1"/></do_elseif>
+            <do_elseif value="$root_term" exact="'false'"><remove_value name="$pchain.{1}"/><return value="0"/></do_elseif>
             <do_elseif value="$root_term" exact="'global'" comment="read a global var as start param - getting info from first two properties">
               <set_value name="$returnValue" exact="global.{$pchain.{2}}"/>
               <do_if value="$returnValue.exists">
