@@ -326,18 +326,25 @@
             <debug_text filter="general" text="'Help triggered' + event.param3"/>
           </conditions>
           <actions>
-            <do_if value="event.param3.$text == {5554401,2}" comment="general help/overview">
+            <get_text_ids_in_range page="5554401" start="2" end="40" factor="2" result="$help_pages"/>
+            <do_if value="$help_pages.indexof.{event.param3.$text}">
               <run_actions ref="WriteOutputAndHistory">
-                <param name="output" value="{5554401,3}"/>
+                <param name="output" value="readtext.{5554401}.{$help_pages.indexof.{event.param3.$text}+1}"/>
                 <param name="type" value="'help_out'"/>
               </run_actions>
             </do_if>
-            <do_elseif value="event.param3.$text == {5554401,4}" comment="How to target Objects">
+            <do_else>
+              <set_value name="$help_output" exact="{5554401,2}"/>
+              <do_for_each in="$help_pages">
+                <set_value name="$help_output" exact="$help_output + '\n' + loop.value"/>
+              </do_for_each>
               <run_actions ref="WriteOutputAndHistory">
-                <param name="output" value="{5554401,5}"/>
+                <param name="output" value="$help_output"/>
                 <param name="type" value="'help_out'"/>
               </run_actions>
-            </do_elseif>
+            </do_else>
+            <remove_value name="$help_pages"/>
+            <remove_value name="$help_output"/>
           </actions>
         </cue>
         <cue name="ReadText" instantiate="true">
@@ -1045,14 +1052,6 @@ player. => currently implemented as kind of global properties - have to improve 
               <remove_value name="$pchain.{1}"/>
               <return value="0"/>
             </do_elseif>
-            <do_elseif value="$root_term" exact="'global'" comment="read a global var as start param - getting info from first two properties">
-              <set_value name="$returnValue" exact="global.{$pchain.{2}}"/>
-              <do_if value="$returnValue.exists">
-                <remove_value name="$pchain.{1}"/>
-                <remove_value name="$pchain.{1}"/>
-                <return value="$returnValue"/>
-              </do_if>
-            </do_elseif>
             <do_elseif value="$root_term == 'component' or $root_term == 'object'" comment="getting an object from a number  - using first 2 properties">
               <set_value name="$returnValue" exact="component.{$pchain.{2}}"/>
               <remove_value name="$pchain.{1}"/>
@@ -1088,6 +1087,22 @@ player. => currently implemented as kind of global properties - have to improve 
               <set_value name="$returnValue" exact="md.{$pchain.{2}}.{$pchain.{3}}"/>
               <do_if value="$returnValue.exists">
                 <remove_value name="$pchain.{1}"/>
+                <remove_value name="$pchain.{1}"/>
+                <remove_value name="$pchain.{1}"/>
+                <return value="$returnValue"/>
+              </do_if>
+            </do_elseif>
+            <do_elseif value="$root_term" exact="'mdvar'" comment="read a md global var as start param - getting info from first two properties">
+              <set_value name="$returnValue" exact="md.{$pchain.{2}}"/>
+              <do_if value="$returnValue.exists">
+                <remove_value name="$pchain.{1}"/>
+                <remove_value name="$pchain.{1}"/>
+                <return value="$returnValue"/>
+              </do_if>
+            </do_elseif>
+            <do_elseif value="$root_term" exact="'global'" comment="read a global var as start param - getting info from first two properties">
+              <set_value name="$returnValue" exact="global.{$pchain.{2}}"/>
+              <do_if value="$returnValue.exists">
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
                 <return value="$returnValue"/>
