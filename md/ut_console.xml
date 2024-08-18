@@ -303,18 +303,6 @@
             </do_if>
           </actions>
         </cue>
-        <cue name="Chatwindow_Feedback" instantiate="true">
-          <conditions>
-            <check_any>
-              <event_cue_signalled/>
-              <event_ui_triggered screen="'Chat_Window_API'" control="'chatwindow_opened'"/>
-            </check_any>
-          </conditions>
-          <actions>
-            <!-- Print and Save Messages -->
-            <!-- Resore Messages on Window re-open -->
-          </actions>
-        </cue>
         <cue name="Check" instantiate="true">
           <conditions>
             <check_any>
