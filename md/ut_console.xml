@@ -910,6 +910,183 @@
             </cue>
           </cues>
         </cue>
+        <cue name="WatchObjectEvents" instantiate="true" namespace="this">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'watch_event_object'"/>
+          </conditions>
+          <actions>
+            <set_value name="$cmd_lvl" exact="1"/>
+            <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'watch_event_object [h(elp)] $object $\nWatches many (WIP:all) events with $object as the object param, and prints it ot the log. no history output since its spammy.'"/>
+            <include_actions ref="PrintHelpAndUnpackTerms"/>
+            <run_actions ref="EvaluatePropertyFromRoot" result="$Object">
+              <param name="pchain" value="$terms_converted.{2}"/>
+              <param name="ListOutput" value="false"/>
+            </run_actions>
+            <do_if value="(typeof $Object).isnumeric">
+              <set_value name="$Object" exact="component.{$Object}"/>
+            </do_if>
+            <do_if value="not $Object.exists">
+              <cancel_cue cue="this"/>
+            </do_if>
+          </actions>
+          <cues>
+            <cue name="StopWatchObjectEvents">
+              <conditions>
+                <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+                <check_value value="event.param3.$text" exact="{5554401,1}+'watch_event_object stop'"/>
+              </conditions>
+              <actions>
+                <reset_cue cue="WatchObjectEvents"/>
+              </actions>
+            </cue>
+            <cue name="ObjectEvent" instantiate="true">
+              <conditions>
+                <check_any>
+                  <event_object_destroyed object="$Object"/>
+                  <event_object_abandoned object="$Object"/>
+                  <event_object_activated_weapon object="$Object"/>
+                  <event_object_activated_weapongroup object="$Object"/>
+                  <event_object_approaching_waypoint object="$Object"/>
+                  <event_object_arrived_at_waypoint object="$Object"/>
+                  <event_object_attacked object="$Object"/>
+                  <event_object_attacked_object object="$Object"/>
+                  <event_object_bomb_attached object="$Object"/>
+                  <event_object_bomb_defused object="$Object"/>
+                  <event_object_build_storage_moved object="$Object"/>
+                  <event_object_built_ship object="$Object"/>
+                  <event_object_built_station object="$Object"/>
+                  <event_object_changed_assignment object="$Object"/>
+                  <event_object_changed_attention object="$Object"/>
+                  <event_object_changed_cluster object="$Object"/>
+                  <event_object_changed_contested_state object="$Object"/>
+                  <event_object_changed_object object="$Object"/>
+                  <event_object_changed_owner object="$Object"/>
+                  <event_object_changed_room object="$Object"/>
+                  <event_object_changed_sector object="$Object"/>
+                  <event_object_changed_state object="$Object"/>
+                  <event_object_changed_subordinategroup object="$Object"/>
+                  <event_object_changed_true_owner object="$Object"/>
+                  <event_object_changed_zone object="$Object"/>
+                  <event_object_claimed claimed="$Object"/>
+                  <event_object_claimed pilot="$Object"/>
+                  <event_object_collected_ammo object="$Object"/>
+                  <event_object_collected_powerup object="$Object"/>
+                  <event_object_collected_resource object="$Object"/>
+                  <event_object_collected_ware object="$Object"/>
+                  <event_object_collided object="$Object"/>
+                  <event_object_commander_set object="$Object"/>
+                  <event_object_component_dismantled object="$Object"/>
+                  <event_object_construction_sequence_created object="$Object"/>
+                  <event_object_deactivated_weapon object="$Object"/>
+                  <event_object_deactivated_weapongroup object="$Object"/>
+                  <event_object_defencedronemode_changed object="$Object"/>
+                  <event_object_defencedrones_armed object="$Object"/>
+                  <event_object_defencedrones_disarmed object="$Object"/>
+                  <event_object_dismantled object="$Object"/>
+                  <event_object_dismantled_component object="$Object"/>
+                  <event_object_dismantled_object object="$Object"/>
+                  <event_object_dismantling_failed object="$Object"/>
+                  <event_object_dock_assigned object="$Object"/>
+                  <event_object_dock_assigned_at object="$Object"/>
+                  <event_object_dock_too_far object="$Object"/>
+                  <event_object_dock_unassigned object="$Object"/>
+                  <event_object_dock_unassigned_from container="$Object"/>
+                  <event_object_docked object="$Object"/>
+                  <event_object_docked_at container="$Object"/>
+                  <event_object_docking_aborted object="$Object"/>
+                  <event_object_docking_denied object="$Object"/>
+                  <event_object_docking_impossible object="$Object"/>
+                  <event_object_docking_queued object="$Object"/>
+                  <event_object_docking_started object="$Object"/>
+                  <event_object_dropped_objects object="$Object"/>
+                  <event_object_drops_found object="$Object"/>
+                  <event_object_enemy_found object="$Object"/>
+                  <event_object_entered space="$Object"/>
+                  <event_object_entered_anomaly object="$Object"/>
+                  <event_object_entered_gate object="$Object"/>
+                  <event_object_entered_live_view object="$Object"/>
+                  <event_object_formation_update_failed object="$Object"/>
+                  <event_object_formation_update_succeeded object="$Object"/>
+                  <event_object_gravidar_factor_changed object="$Object"/>
+                  <event_object_hacked hacked="$Object"/>
+                  <event_object_hacked hacker="$Object"/>
+                  <event_object_hull_above_function_threshold object="$Object"/>
+                  <event_object_hull_below_function_threshold object="$Object"/>
+                  <event_object_hull_damaged object="$Object"/>
+                  <event_object_hull_repaired object="$Object"/>
+                  <event_object_incoming_missile object="$Object"/>
+                  <event_object_interiors_despawning object="$Object"/>
+                  <event_object_killed_object object="$Object"/>
+                  <event_object_known_to_player object="$Object"/>
+                  <event_object_launched_countermeasure object="$Object"/>
+                  <event_object_launched_distressdrone object="$Object"/>
+                  <event_object_launched_lasertower object="$Object"/>
+                  <event_object_launched_mine object="$Object"/>
+                  <event_object_launched_missile object="$Object"/>
+                  <event_object_launched_navbeacon object="$Object"/>
+                  <event_object_launched_resourceprobe object="$Object"/>
+                  <event_object_launched_satellite object="$Object"/>
+                  <event_object_left space="$Object"/>
+                  <event_object_left_live_view object="$Object"/>
+                  <event_object_miningdronemode_changed object="$Object"/>
+                  <event_object_miningdrones_armed object="$Object"/>
+                  <event_object_miningdrones_disarmed object="$Object"/>
+                  <event_object_money_updated object="$Object"/>
+                  <event_object_moved_into_internal_storage object="$Object"/>
+                  <event_object_opened_lockbox object="$Object"/>
+                  <event_object_order_cancelled object="$Object"/>
+                  <event_object_order_finished object="$Object"/>
+                  <event_object_order_param_edited object="$Object"/>
+                  <event_object_order_ready object="$Object"/>
+                  <event_object_order_syncpoint_released object="$Object"/>
+                  <event_object_phase_started object="$Object"/>
+                  <event_object_picked_up object="$Object"/>
+                  <event_object_picked_up_object object="$Object"/>
+                  <event_object_processingmodule_available object="$Object"/>
+                  <event_object_production_cancelled object="$Object"/>
+                  <event_object_production_finished object="$Object"/>
+                  <event_object_production_started object="$Object"/>
+                  <event_object_production_started object="$Object"/>
+                  <event_object_props_despawning object="$Object"/>
+                  <event_object_props_generated object="$Object"/>
+                  <event_object_relation_range_changed object="$Object"/>
+                  <event_object_removed_from_formation object="$Object"/>
+                  <event_object_retrieved_from_internal_storage object="$Object"/>
+                  <event_object_salvage_claim_lost object="$Object"/>
+                  <event_object_salvage_claim_successful object="$Object"/>
+                  <event_object_shield_damaged object="$Object"/>
+                  <event_object_signalled object="$Object"/>
+                  <event_object_started_to_dock_at container="$Object"/>
+                  <event_object_started_to_undock_from container="$Object"/>
+                  <event_object_subordinate_added object="$Object"/>
+                  <event_object_subordinate_promoted object="$Object"/>
+                  <event_object_subordinate_removed object="$Object"/>
+                  <event_object_target_invalid object="$Object"/>
+                  <event_object_took_area_damage object="$Object"/>
+                  <event_object_towed_recyclable_near_furnace object="$Object"/>
+                  <event_object_transportdronemode_changed object="$Object"/>
+                  <event_object_transportdrones_armed object="$Object"/>
+                  <event_object_transportdrones_disarmed object="$Object"/>
+                  <event_object_triggered object="$Object"/>
+                  <event_object_undocked object="$Object"/>
+                  <event_object_undocked_from container="$Object"/>
+                  <event_object_undocking_cleared object="$Object"/>
+                  <event_object_undocking_started object="$Object"/>
+                  <event_object_weapon_ammo_changed object="$Object"/>
+                  <event_object_weaponmode_changed object="$Object"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <!-- not logging to his here, since his is just for live analysis -->
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'\033Y' + player.systemtime.{'%H:%M:%S'} + ' \033W' + event.name + ' \033Z' + @event.object + ' \033R' + @event.param + ' \033G' + @event.param2 + ' \033B' + @event.param3"/>
+                <do_if value="event.name == 'event_object_destroyed'" comment="cleanup when destroyed">
+                  <cancel_cue cue="this.parent"/>
+                </do_if>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
         <cue name="Debugmode" instantiate="true">
           <conditions>
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
