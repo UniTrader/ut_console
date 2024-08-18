@@ -5402,15 +5402,33 @@ attribute	name	set_object_velocity
         <cue name="RestoreHistory">
           <!-- re-print the last X commands when the chat window is opened again; might not be needed with future revisions of the text console -->
           <conditions>
-            <!-- event_ui_triggered screen="'Chat_Window_API'" control="'##TBD##'"/ -->
-            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
-            <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'his'"/>
+            <check_any>
+              <event_ui_triggered screen="'Chat_Window_API'" control="'chatwindow_opened'"/>
+              <check_all>
+                <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+                <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'his'"/>
+              </check_all>
+            </check_any>
           </conditions>
           <actions>
-            <set_value name="$repeat_count" exact="if event.param3.$terms.{2}? then event.param3.$terms.{2} else 20"/>
+            <set_value name="$search_term" exact="@event.param3.$terms.{2}" comment="could also be just the number of commands to repeat"/>
+            <set_value name="$repeat_count" exact="if $search_term.isnumeric then event.param3.$terms.{2} else 20"/>
+            <set_value name="$search_term" exact="null" chance="$search_term.isnumeric * 100"/>
             <set_value name="$output_list" exact="[]"/>
             <do_all exact="$his_text.count" counter="$i" reverse="true">
-              <do_if value="if event.param3.$terms.{3}? then $his_type.{$i} == event.param3.$terms.{3} else ($his_type != 'debug_out' or Root.$debugmode)">
+              <do_if value="$search_term">
+                <substitute_text text="$tmp" source="$his_text.{$i}">
+                  <replace string="$search_term" with="'== FOUND =='"/>
+                </substitute_text>
+                <do_if value="$tmp != $his_text.{$i}">
+                  <append_to_list name="$output_list" exact="$his_text.{$i}"/>
+                  <set_value name="$repeat_count" operation="subtract"/>
+                  <do_if value="not $repeat_count">
+                    <break/>
+                  </do_if>
+                </do_if>
+              </do_if>
+              <do_elseif value="if event.param3.$terms.{3}? then $his_type.{$i} == event.param3.$terms.{3} else ($his_type != 'debug_out' or Root.$debugmode)">
                 <append_to_list name="$output_list" exact="$his_text.{$i}"/>
                 <set_value name="$repeat_count" operation="subtract"/>
                 <do_if value="not $repeat_count">
