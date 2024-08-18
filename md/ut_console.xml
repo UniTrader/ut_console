@@ -888,6 +888,15 @@
             <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'watchui'"/>
           </conditions>
           <cues>
+            <cue name="StopWatchUIEvents">
+              <conditions>
+                <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+                <check_value value="event.param3.$text" exact="{5554401,1}+'watchui stop'"/>
+              </conditions>
+              <actions>
+                <reset_cue cue="WatchUIEvents"/>
+              </actions>
+            </cue>
             <cue name="UIEvent" instantiate="true">
               <conditions>
                 <event_ui_triggered/>
@@ -897,15 +906,6 @@
               <actions>
                 <!-- not logging to his here, since his is just for live analysis -->
                 <raise_lua_event name="'Chat_Window_API.Print'" param="'\033Y' + player.systemtime.{'%H:%M:%S'} + ' \033W' + event.name + ' \033Z' + @event.object + ' \033R' + @event.param + ' \033G' + @event.param2 + ' \033B' + @event.param3"/>
-              </actions>
-            </cue>
-            <cue name="StopWatchUIEvents">
-              <conditions>
-                <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
-                <check_value value="event.param3.$text" exact="{5554401,1}+'watchui stop'"/>
-              </conditions>
-              <actions>
-                <reset_cue cue="WatchUIEvents"/>
               </actions>
             </cue>
           </cues>
