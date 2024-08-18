@@ -5434,7 +5434,7 @@ attribute	name	set_object_velocity
                 <do_if value="not $repeat_count">
                   <break/>
                 </do_if>
-              </do_if>
+              </do_elseif>
             </do_all>
             <do_for_each in="$output_list" reverse="true">
               <!-- the color code is to make obvious this output was restored from his - but thats transitional till its fully migrated -->
