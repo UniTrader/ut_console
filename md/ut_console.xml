@@ -370,7 +370,7 @@
               </run_actions>
             </do_elseif>
             <do_elseif value="$terms.{4} == 'p' or $terms.{4} == 'popup'">
-              <show_help position="if $terms.count == 5 then $terms_converted.{5} else 0" custom="readtext.{$pageid}.{$textid}"/>
+              <show_help position="if $terms.count == 5 then $terms_converted.{5} else 0" custom="readtext.{$pageid}.{$textid}" allowinmenu="true"/>
             </do_elseif>
             <do_elseif value="$terms.{4} == 's' or $terms.{4} == 'speak'">
               <speak actor="if $terms.{5}? then $terms.{5} else player.entity" page="$pageid" line="$textid"/>
