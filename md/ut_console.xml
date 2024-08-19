@@ -966,6 +966,51 @@
             <cue name="ObjectEvent" instantiate="true">
               <conditions>
                 <check_any>
+                  <!-- events using object, bt not having it in their name -->
+                  <event_repair_requested object="$Object"/>
+                  <event_unit_destroyed object="$Object"/>
+                  <event_unit_started_building object="$Object"/>
+                  <event_unit_started_repairing object="$Object"/>
+                  <event_unit_stopped_building object="$Object"/>
+                  <event_unit_stopped_repairing object="$Object"/>
+                  <event_boarding_support_failed object="$Object"/>
+                  <event_boarding_support_requested boarded="$Object"/>
+                  <event_boarding_support_requested boarder="$Object"/>
+                  <event_boarding_support_succeeded object="$Object"/>
+                  <event_boost_charging_aborted object="$Object"/>
+                  <event_boost_charging_started object="$Object"/>
+                  <event_boost_started object="$Object"/>
+                  <event_boost_stopped object="$Object"/>
+                  <event_build_added object="$Object"/>
+                  <event_build_cancelled object="$Object"/>
+                  <event_build_finished object="$Object"/>
+                  <event_build_finished_components object="$Object"/>
+                  <event_build_loadout_applied object="$Object"/>
+                  <event_build_started object="$Object"/>
+                  <event_control_entity_added object="$Object"/>
+                  <event_control_entity_removed object="$Object"/>
+                  <event_long_range_scan_ping object="$Object"/>
+                  <event_long_range_scan_sent object="$Object"/>
+                  <event_character_animation_finished object="$Object"/>
+                  <event_character_animation_started object="$Object"/>
+                  <event_npc_walk_finished object="$Object"/>
+                  <event_npc_slots_validated object="$Object"/>
+                  <event_masstraffic_ship_removed object="$Object"/>
+                  <event_gravidar_has_scanned object="$Object"/>
+                  <event_alert_level_changed object="$Object"/>
+                  <event_traffic_level_changed object="$Object"/>
+                  <event_detached_from_masstraffic object="$Object"/>
+                  <event_weapon_fired object="$Object"/>
+                  <event_weapon_overheated object="$Object"/>
+                  <event_inventory_added object="$Object"/>
+                  <event_inventory_removed object="$Object"/>
+                  <event_supplies_added object="$Object"/>
+                  <event_supplies_removed object="$Object"/>
+                  <event_supply_orders_added object="$Object"/>
+                  <event_supply_orders_removed object="$Object"/>
+                  <event_lockbox_opened object="$Object"/>
+                  <event_weapon_ammo_changed object="$Object"/>
+                  <!-- direct object events -->
                   <event_object_destroyed object="$Object"/>
                   <event_object_abandoned object="$Object"/>
                   <event_object_activated_weapon object="$Object"/>
