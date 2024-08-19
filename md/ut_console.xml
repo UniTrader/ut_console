@@ -522,10 +522,6 @@
             <set_value name="$cmd_lvl" exact="2"/>
             <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'checkship [h(elp)] $macro$ (crewskill.&lt;number&gt;) (paintcycletime.&lt;number&gt;) (ware.paintmod&lt;number&gt;) \n Spawns the Ship/Object macro given, and collects some Stats about it (General info, Availability, Ressources, Spawn Amounts) which are sent via Message. \n Note that several Boolean Infos might be condensed to two lines\n You can also specify a Crew Skill level (in Starts) and one or more Paintmods to add to the check loop, and change the tie to switch paintjobss'"/>
             <include_actions ref="PrintHelpAndUnpackTerms"/>
-            <run_actions ref="EvaluatePropertyFromRoot" result="$macro">
-              <param name="pchain" value="$terms_converted.{2}"/>
-              <param name="ListOutput" value="false"/>
-            </run_actions>
             <set_value name="$crewskill" exact="15"/>
             <set_value name="$paintcycletime" exact="3s"/>
             <set_value name="$paintmods" exact="[]"/>
@@ -553,12 +549,25 @@
             <append_to_list name="$paintmods" exact="ware.paintmod_0136" comment="Corrosive - for Dirt and Rust"/>
             <append_to_list name="$paintmods" exact="ware.paintmod_0015" comment="Not Like This (Error theme) - for reasons.."/>
             <!-- Technically you can pass an Object here too -->
-            <do_if value="@(typeof $macro).isnumber">
-              <set_value name="$macro" exact="component.{$macro}.macro"/>
+            <do_if value="(typeof $terms_converted.{2}.{1}) == datatype.string and not $terms_converted.{2}.{2}?">
+                <raise_lua_event name="'Chat_Window_API.Print'" param="'converting ' +$terms_converted.{2}.{1} + ' from string to macro: ' + macro.{$terms_converted.{2}.{1}}"/>
+              <set_value name="$macro" exact="macro.{$terms_converted.{2}.{1}}"/>
             </do_if>
-            <do_elseif value="(typeof $macro) == datatype.component">
-              <set_value name="$macro" exact="$macro.macro"/>
-            </do_elseif>
+            <do_else>
+              <run_actions ref="EvaluatePropertyFromRoot" result="$macro">
+                <param name="pchain" value="$terms_converted.{2}"/>
+                <param name="ListOutput" value="false"/>
+              </run_actions>
+              <do_if value="@(typeof $macro).isnumber">
+                <set_value name="$macro" exact="component.{$macro}.macro"/>
+              </do_if>
+              <do_elseif value="(typeof $macro) == datatype.component">
+                <set_value name="$macro" exact="$macro.macro"/>
+              </do_elseif>
+              <do_elseif value="(typeof $macro) == datatype.string">
+                <set_value name="$macro" exact="macro.{$macro}"/>
+              </do_elseif>
+            </do_else>
             <do_if value="(typeof $macro) == datatype.macro" comment="make sure it exists before starting the Spam">
               <!-- Gather general Data about the Macro -->
               <set_value name="$output" exact="'     Macro Data for ' + $macro.id"/>
