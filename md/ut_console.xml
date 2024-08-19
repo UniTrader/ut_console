@@ -526,7 +526,7 @@
               <param name="pchain" value="$terms_converted.{2}"/>
               <param name="ListOutput" value="false"/>
             </run_actions>
-            <set_value name="$crewskill" exact="5"/>
+            <set_value name="$crewskill" exact="15"/>
             <set_value name="$paintcycletime" exact="3s"/>
             <set_value name="$paintmods" exact="[]"/>
             <do_all exact="$terms_converted.count" counter="$i">
@@ -661,12 +661,26 @@
                 <owner exact="faction.player"/>
                 <pilot>
                   <select race="$macro.makerraces" tags="tag.aipilot"/>
+                    <skills>
+                      <skill type="boarding" exact="$crewskill"/>
+                      <skill type="engineering" exact="$crewskill"/>
+                      <skill type="management" exact="$crewskill"/>
+                      <skill type="morale" exact="$crewskill"/>
+                      <skill type="piloting" exact="$crewskill"/>
+                    </skills>
                   <owner exact="faction.player"/>
                 </pilot>
                 <people>
                   <fillpercent exact="100"/>
                   <person role="service">
                     <select race="$macro.makerraces" tags="tag.crew"/>
+                    <skills>
+                      <skill type="boarding" exact="$crewskill"/>
+                      <skill type="engineering" exact="$crewskill"/>
+                      <skill type="management" exact="$crewskill"/>
+                      <skill type="morale" exact="$crewskill"/>
+                      <skill type="piloting" exact="$crewskill"/>
+                    </skills>
                   </person>
                 </people>
                 <loadout>
