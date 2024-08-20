@@ -11,6 +11,7 @@
       <actions>
         <set_value name="$secretvalue" exact="'You will never see this!!!'" comment="test value for the eval md command"/>
         <set_value name="$debugmode" exact="false"/>
+        <!-- NOTE: Console internal Vars start AND End with $ to differ them from other Vars that will be referenced -->
         <set_value name="$console_vars" exact="table[]"/>
       </actions>
       <cues>
@@ -1897,7 +1898,30 @@ player. => currently implemented as kind of global properties - have to improve 
             </do_if>
             <set_value name="$currentProperty" exact="$PropertyList.{1}"/>
             <set_value name="$properties_to_remove" exact="1"/>
+            <!-- Check if we have a Variable Value here -->
+            <substitute_text text="$test" source="$currentProperty">
+              <replace string="'$'" with="''"/>
+            </substitute_text>
+            <set_value name="$test2" exact="'$' + $test"/>
+            <do_if value="($test != $Property and $test2 == $Property) or (( typeof $SetValue ).indexof.[datatype.list,datatype.table] and (typeof $SetProperty).isnumeric)">
+              <!-- property starts with $ - Interpret as Table Value/Entry for now (working on Console Vars later ...) -->
+              <set_value name="$isvariable"/>
+            </do_if>
             <do_if value="false" comment="special handling properties, written by hand"/>
+            <!-- read entry from list / table -->
+            <do_elseif value="$isvariable?" comment="Value is to be interpreted as index/var name for a table, list, group, cue or blackboard var (automatic)">
+              <remove_value name="$isvariable"/>
+              <set_value name="$resultValue" exact="$PropertyValue.{$currentProperty}"/>
+            </do_elseif>
+            <do_elseif value="$currentProperty == 'rl' or $currentProperty == 'rt' or $currentProperty == 'rg' or $currentProperty == 'rb' or $currentProperty == 'rc'" comment="as in 'readlist','readtable','readgroup','readblackboard' or 'readcue'; just if you want to enforce this behavior; automatic detection before....">
+              <set_value name="$resultValue" exact="$PropertyValue.{$PropertyList.{2}}"/>
+              <set_value name="$properties_to_remove" exact="2"/>
+            </do_elseif>
+            <do_elseif value="$currentProperty == 'comp'" comment="compare hack; adding proper function later">
+              <set_value name="$resultValue" exact="$PropertyValue == $PropertyList.{2}"/>
+              <set_value name="$properties_to_remove" exact="2"/>
+              <set_value name="$null_is_valid"/>
+            </do_elseif>
             <!-- convert current value (to integer, float, object )-->
             <do_elseif value="$currentProperty == 'cv:i'">
               <set_value name="$resultValue" exact="($PropertyValue)i"/>
@@ -1911,16 +1935,6 @@ player. => currently implemented as kind of global properties - have to improve 
             <!-- check the Datatype -->
             <do_elseif value="$currentProperty == 'typeof'">
               <set_value name="$resultValue" exact="typeof $PropertyValue"/>
-            </do_elseif>
-            <!-- read entry from list / table -->
-            <do_elseif value="$currentProperty == 'rl' or $currentProperty == 'rt' or $currentProperty == 'rg'" comment="as in 'readlist' or 'readtable' or 'readgroup'">
-              <set_value name="$resultValue" exact="$PropertyValue.{$PropertyList.{2}}"/>
-              <set_value name="$properties_to_remove" exact="2"/>
-            </do_elseif>
-            <do_elseif value="$currentProperty == 'comp'" comment="hack; adding proper function later">
-              <set_value name="$resultValue" exact="$PropertyValue == $PropertyList.{2}"/>
-              <set_value name="$properties_to_remove" exact="2"/>
-              <set_value name="$null_is_valid"/>
             </do_elseif>
             <!-- How it was generated: first filter the scriptproperties.xml with this XPath:
 //property[not(contains(@name, '.')) and not(contains(@name, '<')) and not(contains(@name, '{')) and not(contains(@name, '@'))]/@name
