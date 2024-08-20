@@ -77,11 +77,11 @@
                 <!-- We got all the Values we needed for the Action - perform it!-->
                 <do_if value="$abortreason == null">
                   <substitute_text text="$test" source="$SetProperty">
-                    <replace string="'$'" with="'ContainsVar'"/>
+                    <replace string="'$'" with="''"/>
                   </substitute_text>
-                  <do_if value="$test != $Property">
-                    <!-- property might be a Var in a Table, Cue or blackboard - try to directly set it (method is the same for all cases) -->
-                    
+                  <set_value name="$test2" exact="'$' + $test"/>
+                  <do_if value="($test != $Property and $test2 == $Property) or (( typeof $SetValue ).indexof.[datatype.list,datatype.table] and (typeof $SetProperty).isnumeric)">
+                    <!-- property is a Var in a Table, Cue or blackboard, or an index number for a List or Table - try to directly set it (method is the same for all cases) -->
                     <set_value name="$SetValue.{$SetProperty}" exact="$GetValue"/>
                     <set_value name="$FinalValue" exact="$SetValue.{$SetProperty}"/>
                   </do_if>
@@ -95,6 +95,7 @@
                     </run_actions>
                   </do_else>
                   <remove_value name="$test"/>
+                  <remove_value name="$test2"/>
                 </do_if>
                 <do_if value="$abortreason != null">
                   <run_actions ref="WriteOutputAndHistory">
