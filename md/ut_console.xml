@@ -76,13 +76,25 @@
                 </do_if>
                 <!-- We got all the Values we needed for the Action - perform it!-->
                 <do_if value="$abortreason == null">
-                  <run_actions ref="SaveProperty" result="$FinalValue">
-                    <param name="Property" value="$SetProperty"/>
-                    <param name="PropertyValue" value="$SetValue"/>
-                    <param name="ListOutput" value="false"/>
-                    <param name="SaveValue" value="$GetValue"/>
-                    <param name="SaveValue2" value="$Get2Value"/>
-                  </run_actions>
+                  <substitute_text text="$test" source="$SetProperty">
+                    <replace string="'$'" with="'ContainsVar'"/>
+                  </substitute_text>
+                  <do_if value="$test != $Property">
+                    <!-- property might be a Var in a Table, Cue or blackboard - try to directly set it (method is the same for all cases) -->
+                    
+                    <set_value name="$SetValue.{$SetProperty}" exact="$GetValue"/>
+                    <set_value name="$FinalValue" exact="$SetValue.{$SetProperty}"/>
+                  </do_if>
+                  <do_else>
+                    <run_actions ref="SaveProperty" result="$FinalValue">
+                      <param name="Property" value="$SetProperty"/>
+                      <param name="PropertyValue" value="$SetValue"/>
+                      <param name="ListOutput" value="false"/>
+                      <param name="SaveValue" value="$GetValue"/>
+                      <param name="SaveValue2" value="$Get2Value"/>
+                    </run_actions>
+                  </do_else>
+                  <remove_value name="$test"/>
                 </do_if>
                 <do_if value="$abortreason != null">
                   <run_actions ref="WriteOutputAndHistory">
@@ -322,7 +334,7 @@
         <cue name="Help" instantiate="true">
           <conditions>
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
-            <check_value value="event.param3.$terms.{1}" exact="{5554401,2}"/>
+            <check_value value="event.param3.$terms.{1}" exact="{5554401,4}"/>
             <debug_text filter="general" text="'Help triggered' + event.param3"/>
           </conditions>
           <actions>
@@ -1202,7 +1214,7 @@
           <actions>
             <signal_cue_instantly cue="ShowMarker" param="$cmd_lvl"/>
             <run_actions ref="WriteOutputAndHistory">
-              <param name="output" value="event.param3.text"/>
+              <param name="output" value="event.param3.$text"/>
               <param name="type" value="if $cmd_lvl ge 3 then 'command_hot' else 'command'"/>
             </run_actions>
             <set_value name="$terms" exact="event.param3.$terms"/>
@@ -1327,21 +1339,23 @@ player. => currently implemented as kind of global properties - have to improve 
             </do_elseif>
             <do_elseif value="$root_term == 'component' or $root_term == 'object'" comment="getting an object from a number  - using first 2 properties">
               <set_value name="$returnValue" exact="component.{$pchain.{2}}"/>
-              <remove_value name="$pchain.{1}"/>
-              <remove_value name="$pchain.{1}"/>
-              <return value="$returnValue"/>
-            </do_elseif>
-            <do_elseif value="$root_term" exact="'gameparam'" comment="reading game params - getting info from first two properties">
-              <set_value name="$returnValue" exact="param.{$pchain.{2}}"/>
               <do_if value="$returnValue.exists">
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
                 <return value="$returnValue"/>
               </do_if>
             </do_elseif>
+            <do_elseif value="$root_term" exact="'gameparam'" comment="reading game params - getting info from first two properties">
+              <do_if value="param.{$pchain.{2}}">
+                <set_value name="$returnValue" exact="param.{$pchain.{2}}"/>
+                <remove_value name="$pchain.{1}"/>
+                <remove_value name="$pchain.{1}"/>
+                <return value="$returnValue"/>
+              </do_if>
+            </do_elseif>
             <do_elseif value="$root_term" exact="'param'" comment="reading script params - getting info from first three properties">
-              <set_value name="$returnValue" exact="param.{$pchain.{2}}.{$pchain.{3}}"/>
-              <do_if value="$returnValue.exists">
+              <do_if value="param.{$pchain.{2}}.{$pchain.{3}}?">
+                <set_value name="$returnValue" exact="param.{$pchain.{2}}.{$pchain.{3}}"/>
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
@@ -1349,8 +1363,8 @@ player. => currently implemented as kind of global properties - have to improve 
               </do_if>
             </do_elseif>
             <do_elseif value="$root_term" exact="'macro'" comment="readig data from a macro, getting values from the first two properties, therefore removing them">
-              <set_value name="$returnValue" exact="macro.{$pchain.{2}}"/>
-              <do_if value="$returnValue.exists">
+              <do_if value="macro.{$pchain.{2}}?">
+                <set_value name="$returnValue" exact="macro.{$pchain.{2}}"/>
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
                 <return value="$returnValue"/>
@@ -1382,10 +1396,12 @@ player. => currently implemented as kind of global properties - have to improve 
               </do_if>
             </do_elseif>
             <do_elseif value="$root_term" exact="'faction'" comment="getting a faction  - using first 2 properties">
-              <set_value name="$returnValue" exact="faction.{$pchain.{2}}"/>
-              <remove_value name="$pchain.{1}"/>
-              <remove_value name="$pchain.{1}"/>
-              <return value="$returnValue"/>
+              <do_if value="faction.{$pchain.{2}}?">
+                <set_value name="$returnValue" exact=""/>
+                <remove_value name="$pchain.{1}"/>
+                <remove_value name="$pchain.{1}"/>
+                <return value="$returnValue"/>
+              </do_if>
             </do_elseif>
             <do_elseif value="$root_term" exact="'tag'" comment="getting/creating a tag (only useful to set up Console Vars) - using first 2 properties">
               <set_value name="$returnValue" exact="tag.{$pchain.{2}}"/>
@@ -1426,7 +1442,7 @@ player. => currently implemented as kind of global properties - have to improve 
                 <remove_value name="$pchain.{1}"/>
                 <return value="$returnValue"/>
               </do_elseif>
-              <do_elseif value="$root_term" exact="'readtext'" comment="getting a text from the textdb (only useful to set up Console Vars; use eadtext command to test texts instead) - using first 3 properties">
+              <do_elseif value="$root_term" exact="'readtext'" comment="getting a text from the textdb (only useful to set up Console Vars; use readtext command to test texts instead) - using first 3 properties">
                 <set_value name="$returnValue" exact="readtext.{$pchain.{2}}.{$pchain.{3}}"/>
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
@@ -1764,11 +1780,16 @@ player. => currently implemented as kind of global properties - have to improve 
                 <return value="$returnValue"/>
               </do_elseif>
               <do_else>
-                <run_actions ref="WriteOutputAndHistory">
-                  <param name="output" value="'Invalid root property ' + $root_term"/>
-                  <param name="type" value="'command_out'"/>
-                </run_actions>
-                <return value="'error'"/>
+                <do_if value="$pchain.count == 1" comment="single property - just take it literally">
+                  <return value="$pchain.{1}"/>
+                </do_if>
+                <do_else>
+                  <run_actions ref="WriteOutputAndHistory">
+                    <param name="output" value="'Invalid root property ' + $root_term"/>
+                    <param name="type" value="'command_out'"/>
+                  </run_actions>
+                  <return value="'error'"/>
+                </do_else>
               </do_else>
             </do_else>
           </actions>
@@ -1835,7 +1856,7 @@ player. => currently implemented as kind of global properties - have to improve 
                   <do_elseif value="$retval.exists">
                     <run_actions ref="WriteOutputAndHistory">
                       <param name="output" value="'Found another Object with matching idcode, but only returning first ( %s )'.[$object.debugname]"/>
-                      <param name="type" value="'debug_out'"/>
+                      <param name="type" value="'command_out'"/>
                     </run_actions>
                   </do_elseif>
                   <do_else>
@@ -1885,6 +1906,10 @@ player. => currently implemented as kind of global properties - have to improve 
             </do_elseif>
             <do_elseif value="$currentProperty == 'cv:component'">
               <set_value name="$resultValue" exact="component.{$PropertyValue}"/>
+            </do_elseif>
+            <!-- check the Datatype -->
+            <do_elseif value="$currentProperty == 'typeof'">
+              <set_value name="$resultValue" exact="typeof $PropertyValue"/>
             </do_elseif>
             <!-- read entry from list / table -->
             <do_elseif value="$currentProperty == 'rl' or $currentProperty == 'rt' or $currentProperty == 'rg'" comment="as in 'readlist' or 'readtable' or 'readgroup'">
@@ -4720,7 +4745,7 @@ and then use libreofice calc to fill in the do_elseif, removing dupes
             </do_else>
             <!-- Recursive Call and Return Result Logic - Intended to return the last valid result, or a list of all in-between results.
 In case of Error $PropertyList will contain all non-evaluated properties. Also the Return list will contain the un-evaluated ones as String. -->
-            <do_if value="$resultValue != null or $null_is_valid">
+            <do_if value="$resultValue != null or $null_is_valid?">
               <remove_value name="$null_is_valid"/>
               <remove_value name="$PropertyList.{1}"/>
               <do_if value="$properties_to_remove" exact="2">
@@ -5703,6 +5728,7 @@ attribute	name	set_object_velocity
             <set_value name="$repeat_count" exact="if $search_term.isnumeric then event.param3.$terms.{2} else 20"/>
             <set_value name="$search_term" exact="null" chance="$search_term.isnumeric * 100"/>
             <set_value name="$output_list" exact="[]"/>
+            <set_value name="$output_type" exact="[]"/>
             <do_all exact="$his_text.count" counter="$i" reverse="true">
               <do_if value="$search_term">
                 <substitute_text text="$tmp" source="$his_text.{$i}">
@@ -5718,15 +5744,30 @@ attribute	name	set_object_velocity
               </do_if>
               <do_elseif value="if event.param3.$terms.{3}? then $his_type.{$i} == event.param3.$terms.{3} else ($his_type != 'debug_out' or Root.$debugmode)">
                 <append_to_list name="$output_list" exact="$his_text.{$i}"/>
+                <append_to_list name="$output_type" exact="$his_type.{$i}"/>
                 <set_value name="$repeat_count" operation="subtract"/>
                 <do_if value="not $repeat_count">
                   <break/>
                 </do_if>
               </do_elseif>
             </do_all>
-            <do_for_each in="$output_list" reverse="true">
+            <do_for_each in="$output_list" reverse="true" counter="$i">
               <!-- the color code is to make obvious this output was restored from his - but thats transitional till its fully migrated -->
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'\033Y'+loop.value"/>
+            <do_if value="$output_type.{$i} == 'command'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'h \033Y'+$output_list.{$i}"/>
+            </do_if>
+            <do_elseif value="$output_type.{$i} == 'command_hot'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'h \033R'+$output_list.{$i}"/>
+            </do_elseif>
+            <do_elseif value="$output_type.{$i} == 'command_out'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="h $output_list.{$i}"/>
+            </do_elseif>
+            <do_elseif value="$output_type.{$i} == 'debug_out' and  Root.$debugmode">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="h '\033G'+$output_list.{$i}"/>
+            </do_elseif>
+            <do_elseif value="$output_type.{$i} == 'help_out'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'h \033W'+$output_list.{$i}"/>
+            </do_elseif>
            </do_for_each>
           </actions>
         </cue>
@@ -5742,12 +5783,24 @@ attribute	name	set_object_velocity
             </run_actions>
           -->
           <actions>
-            <append_to_list name="$his_text" exact="$output"/>
-            <append_to_list name="$his_type" exact="$type"/>
+            <append_to_list name="CommandHistory.$his_text" exact="$output"/>
+            <append_to_list name="CommandHistory.$his_type" exact="$type"/>
             <!-- the color code is to make obvious this output was actually logged, rather than the old method to just output directly to the chat window - but thats transitional till its fully migrated -->
-            <do_if value="$his_type != 'debug_out' or Root.$debugmode">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="'\033C'+$output"/>
+            <do_if value="$type == 'command'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'\033Y'+$output"/>
             </do_if>
+            <do_elseif value="$type == 'command_hot'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'\033R'+$output"/>
+            </do_elseif>
+            <do_elseif value="$type == 'command_out'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="$output"/>
+            </do_elseif>
+            <do_elseif value="$type == 'debug_out' and  Root.$debugmode">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'\033G'+$output"/>
+            </do_elseif>
+            <do_elseif value="$type == 'help_out'">
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'\033W'+$output"/>
+            </do_elseif>
           </actions>
         </library>
       </cues>
