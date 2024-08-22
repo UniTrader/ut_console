@@ -1876,6 +1876,9 @@ player. => currently implemented as kind of global properties - have to improve 
             <do_elseif value="$returnAsIs">
               <return value="$term"/>
             </do_elseif>
+            <do_elseif value="(typeof $term).isnumeric">
+              <return value="component.{$term}"/>
+            </do_elseif>
             <do_else>
               <run_actions ref="WriteOutputAndHistory">
                 <param name="output" value="'Object Parameter %s not found. Returning error'.[$term]"/>
@@ -1935,6 +1938,16 @@ player. => currently implemented as kind of global properties - have to improve 
             <!-- check the Datatype -->
             <do_elseif value="$currentProperty == 'typeof'">
               <set_value name="$resultValue" exact="typeof $PropertyValue"/>
+            </do_elseif>
+            <!-- Get distance to another Object-->
+            <do_elseif value="$currentProperty == 'distanceto'">
+              <run_actions ref="GetObject" result="$tmp">
+                <param name="term" value="$PropertyList.{2}"/>
+                <param name="returnAsIs" value="false"/>
+              </run_actions>
+              <set_value name="$resultValue" exact="$PropertyValue.distanceto.{$tmp}"/>
+              <set_value name="$properties_to_remove" exact="2"/>
+              <remove_value value="$tmp"/>
             </do_elseif>
             <!-- How it was generated: first filter the scriptproperties.xml with this XPath:
 //property[not(contains(@name, '.')) and not(contains(@name, '<')) and not(contains(@name, '{')) and not(contains(@name, '@'))]/@name
