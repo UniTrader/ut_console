@@ -4775,10 +4775,9 @@ and then use libreofice calc to fill in the do_elseif, removing dupes
 In case of Error $PropertyList will contain all non-evaluated properties. Also the Return list will contain the un-evaluated ones as String. -->
             <do_if value="$resultValue != null or $null_is_valid?">
               <remove_value name="$null_is_valid"/>
-              <remove_value name="$PropertyList.{1}"/>
-              <do_if value="$properties_to_remove" exact="2">
-                <remove_value name="$PropertyList.{2}"/>
-              </do_if>
+              <do_all exact="$properties_to_remove">
+                <remove_value name="$PropertyList.{1}"/>
+              </do_all>
               <do_if value="$PropertyList.count">
                 <run_actions ref="EvaluateProperty" result="$returnValue">
                   <param name="PropertyList" value="$PropertyList"/>
