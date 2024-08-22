@@ -13,6 +13,7 @@
         <set_value name="$debugmode" exact="false"/>
         <!-- NOTE: Console internal Vars start AND End with $ to differ them from other Vars that will be referenced -->
         <set_value name="$console_vars" exact="table[]"/>
+        <set_value name="$ResultList" exact="[]" comment="List of previous Results from a multi-expression Command. Cleared after every Command."/>
       </actions>
       <cues>
         <cue name="UnlockConsole" comment="the potentially dangerous commands are locked behind here. The command itself wont set the usage stage to 3, but any command inside will.">
@@ -445,6 +446,7 @@
                 <param name="pchain" value="$terms_converted.{$i}"/>
                 <param name="ListOutput" value="$ListOutput"/>
               </run_actions>
+              <append_to_list name="$ResultList" exact="$returnValue"/>
               <do_if value="$ListOutput == false">
                 <run_actions ref="WriteOutputAndHistory">
                   <param name="output" value="$terms.{$i} + ' =&gt; ' + $returnValue + if $terms_converted.{$i}.count then $terms_converted.{$i} else ''"/>
@@ -466,6 +468,7 @@
                 </run_actions>
               </do_else>
             </do_all>
+            <clear_list list="$ResultList"/>
           </actions>
         </cue>
         <cue name="PerformAction" instantiate="true" namespace="this" comment="collection of small actions that doesnt need much logic">
@@ -883,6 +886,7 @@
             <do_if value="(typeof $WarpObject).isnumeric">
               <set_value name="$WarpObject" exact="component.{$WarpObject}"/>
             </do_if>
+            <append_to_list name="$ResultList" exact="$returnValue"/>
             <run_actions ref="EvaluatePropertyFromRoot" result="$DestinationObject">
               <param name="pchain" value="$terms_converted.{3}"/>
               <param name="ListOutput" value="false"/>
@@ -890,6 +894,7 @@
             <do_if value="(typeof $DestinationObject).isnumeric">
               <set_value name="$DestinationObject" exact="component.{$DestinationObject}"/>
             </do_if>
+            <clear_list list="$ResultList"/>
             <do_if value="$terms_converted.{2}.count == 0 and $terms_converted.{3}.count == 0">
               <do_if value="$DestinationObject.isclass.cluster or $DestinationObject.isclass.galaxy">
                 <find_sector name="$DestinationSector" space="$DestinationObject"/>
@@ -1416,6 +1421,17 @@ player. => currently implemented as kind of global properties - have to improve 
               <remove_value name="$pchain.{1}"/>
               <remove_value name="$pchain.{1}"/>
               <return value="$returnValue"/>
+            </do_elseif>
+            <do_elseif value="$root_term" exact="'R'" comment="Re-using previous Result -  using first 2 properties">
+              <do_if value="Root.$ResultList.{$pchain.{2}}?">
+                <set_value name="$returnValue" exact="Root.$ResultList.{$pchain.{2}}"/>
+                <remove_value name="$pchain.{1}"/>
+                <remove_value name="$pchain.{1}"/>
+                <return value="$returnValue"/>
+              </do_if>
+              <do_else>
+                  <return value="'error'"/>
+              </do_else>
             </do_elseif>
             <!-- Less useful/frequently used terms below here-->
             <do_else>
