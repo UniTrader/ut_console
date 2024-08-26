@@ -1404,7 +1404,7 @@ player. => currently implemented as kind of global properties - have to improve 
             </do_elseif>
             <do_elseif value="$root_term" exact="'faction'" comment="getting a faction  - using first 2 properties">
               <do_if value="faction.{$pchain.{2}}?">
-                <set_value name="$returnValue" exact=""/>
+                <set_value name="$returnValue" exact="faction.{$pchain.{2}}"/>
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
                 <return value="$returnValue"/>
@@ -5207,7 +5207,7 @@ attribute	name	set_object_velocity
               <set_faction_relation_locked faction="$PropertyValue" locked="$SaveValue"/>
             </do_elseif>
             <do_elseif value="$Property" exact="'owner'">
-              <set_owner object="$PropertyValue" faction="$SaveValue" overridenpc="$SaveValue2"/>
+              <set_owner object="$PropertyValue" faction="faction.{$SaveValue}" overridenpc="$SaveValue2"/>
             </do_elseif>
             <do_elseif value="$Property" exact="'coverowner'">
               <set_cover_owner object="$PropertyValue" faction="$SaveValue"/>
