@@ -20,7 +20,6 @@
           <conditions>
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
             <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'unlock'"/>
-            <debug_text filter="general" text="'Eval triggered' + event.param3"/>
           </conditions>
           <actions>
             <run_actions ref="WriteOutputAndHistory">
@@ -33,7 +32,6 @@
               <conditions>
                 <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
                 <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'setval'"/>
-                <debug_text filter="general" text="'SetVal triggered' + event.param3" chance="$debugmode * 100"/>
               </conditions>
               <actions>
                 <set_value name="$cmd_lvl" exact="3"/>
@@ -338,9 +336,9 @@
           <conditions>
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
             <check_value value="event.param3.$terms.{1}" exact="{5554401,4}"/>
-            <debug_text filter="general" text="'Help triggered' + event.param3"/>
           </conditions>
           <actions>
+            <debug_text filter="general" text="'Help triggered' + event.param3"/>
             <get_text_ids_in_range page="5554401" start="2" end="40" factor="2" result="$help_pages"/>
             <do_if value="$help_pages.indexof.{event.param3.$text}">
               <run_actions ref="WriteOutputAndHistory">
@@ -415,7 +413,6 @@
           <conditions>
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
             <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'eval'"/>
-            <debug_text filter="general" text="'Eval triggered' + event.param3" chance="$debugmode * 100"/>
           </conditions>
           <actions>
             <set_value name="$cmd_lvl" exact="1"/>
@@ -829,7 +826,6 @@
                 <param name="output" value="'Output File is ' + 'logs/ut_console/' + $macro.id + ' report.txt'"/>
                 <param name="type" value="'command_out'"/>
               </run_actions>
-              <!--debug_text filter="general" text="$output"/-->
               <debug_to_file directory="'ut_console'" name="$macro.id+' report.txt'" text="$output" append="false"/>
             </do_if>
             <do_else>
@@ -5388,7 +5384,7 @@ attribute	name	set_object_velocity
               <raise_lua_event name="'Chat_Window_API.Print'" param="'h ' + $output_list.{$i}"/>
             </do_elseif>
             <do_elseif value="$output_type.{$i} == 'debug_out' and  Root.$debugmode">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="h \033G'+$output_list.{$i}"/>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'h \033G'+$output_list.{$i}"/>
             </do_elseif>
             <do_elseif value="$output_type.{$i} == 'help_out'">
               <raise_lua_event name="'Chat_Window_API.Print'" param="'h \033W'+$output_list.{$i}"/>
