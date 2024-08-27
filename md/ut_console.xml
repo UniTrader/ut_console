@@ -24,7 +24,7 @@
           </conditions>
           <actions>
             <run_actions ref="WriteOutputAndHistory">
-              <param name="output" value="'unlock - All Console Commands unlocked! This includes the Commands that can break our game!\nIf you use them your Save will be marked accordingly. There will be no further Warnings!'"/>
+              <param name="output" value="'unlock - All Console Commands unlocked! This includes the Commands that can break your game!\nIf you use them your Save will be marked accordingly. There will be no further Warnings!'"/>
               <param name="type" value="'command_hot'"/>
             </run_actions>
           </actions>
@@ -33,7 +33,7 @@
               <conditions>
                 <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
                 <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'setval'"/>
-                <debug_text filter="general" text="'SetVal triggered' + event.param3"/>
+                <debug_text filter="general" text="'SetVal triggered' + event.param3" chance="$debugmode * 100"/>
               </conditions>
               <actions>
                 <set_value name="$cmd_lvl" exact="3"/>
@@ -82,7 +82,7 @@
                     <replace string="'$'" with="''"/>
                   </substitute_text>
                   <set_value name="$test2" exact="'$' + $test"/>
-                  <do_if value="($test != $Property and $test2 == $Property) or (( typeof $SetValue ).indexof.[datatype.list,datatype.table] and (typeof $SetProperty).isnumeric)">
+                  <do_if value="($test != $SetProperty and $test2 == $SetProperty) or (( typeof $SetValue ).indexof.{[datatype.list,datatype.table,datatype.cue,datatype.entity]} and (typeof $SetProperty).isnumeric)">
                     <!-- property is a Var in a Table, Cue or blackboard, or an index number for a List or Table - try to directly set it (method is the same for all cases) -->
                     <set_value name="$SetValue.{$SetProperty}" exact="$GetValue"/>
                     <set_value name="$FinalValue" exact="$SetValue.{$SetProperty}"/>
@@ -349,7 +349,7 @@
               </run_actions>
             </do_if>
             <do_else>
-              <set_value name="$help_output" exact="{5554401,2}"/>
+              <set_value name="$help_output" exact="{5554401,4}"/>
               <do_for_each in="$help_pages">
                 <set_value name="$help_output" exact="$help_output + '\n' + loop.value"/>
               </do_for_each>
@@ -415,7 +415,7 @@
           <conditions>
             <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
             <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'eval'"/>
-            <debug_text filter="general" text="'Eval triggered' + event.param3"/>
+            <debug_text filter="general" text="'Eval triggered' + event.param3" chance="$debugmode * 100"/>
           </conditions>
           <actions>
             <set_value name="$cmd_lvl" exact="1"/>
@@ -539,7 +539,7 @@
             <set_value name="$cmd_lvl" exact="2"/>
             <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'checkship [h(elp)] $macro$ (crewskill.&lt;number&gt;) (paintcycletime.&lt;number&gt;) (ware.paintmod&lt;number&gt;) \n Spawns the Ship/Object macro given, and collects some Stats about it (General info, Availability, Ressources, Spawn Amounts) which are sent via Message. \n Note that several Boolean Infos might be condensed to two lines\n You can also specify a Crew Skill level (in Starts) and one or more Paintmods to add to the check loop, and change the tie to switch paintjobss'"/>
             <include_actions ref="PrintHelpAndUnpackTerms"/>
-            <set_value name="$crewskill" exact="15"/>
+            <set_value name="$crewskill" exact="null"/>
             <set_value name="$paintcycletime" exact="3s"/>
             <set_value name="$paintmods" exact="[]"/>
             <do_all exact="$terms_converted.count" counter="$i">
@@ -688,11 +688,11 @@
                 <pilot>
                   <select race="$macro.makerraces" tags="tag.aipilot"/>
                     <skills>
-                      <skill type="boarding" exact="$crewskill"/>
-                      <skill type="engineering" exact="$crewskill"/>
-                      <skill type="management" exact="$crewskill"/>
-                      <skill type="morale" exact="$crewskill"/>
-                      <skill type="piloting" exact="$crewskill"/>
+                      <skill type="boarding" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
+                      <skill type="engineering" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
+                      <skill type="management" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
+                      <skill type="morale" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
+                      <skill type="piloting" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
                     </skills>
                   <owner exact="faction.player"/>
                 </pilot>
@@ -701,16 +701,16 @@
                   <person role="service">
                     <select race="$macro.makerraces" tags="tag.crew"/>
                     <skills>
-                      <skill type="boarding" exact="$crewskill"/>
-                      <skill type="engineering" exact="$crewskill"/>
-                      <skill type="management" exact="$crewskill"/>
-                      <skill type="morale" exact="$crewskill"/>
-                      <skill type="piloting" exact="$crewskill"/>
+                      <skill type="boarding" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
+                      <skill type="engineering" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
+                      <skill type="management" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
+                      <skill type="morale" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
+                      <skill type="piloting" min="if $crewskill != null then $crewskill else 0" max="if $crewskill != null then $crewskill else 15"/>
                     </skills>
                   </person>
                 </people>
                 <loadout>
-                  <level exact="1.0" faction="$faction_list"/>
+                  <level exact="1.0" faction="$faction_list.random"/>
                   <variation exact="0"/>
                 </loadout>
                 <safepos space="player.sector" x="$spawnpos.x" y="$spawnpos.y - 1000m" z="$spawnpos.z"/>
@@ -803,10 +803,6 @@
               <set_value name="$output" exact="$output + '\n\n####################################################\n     Experimental Data: '"/>
               <find_npc_slot name="$tmp" object="$TestShip" multiple="true"/>
               <set_value name="$output" exact="$output + '\n=&gt;npc_slot count: ' + $tmp.count"/>
-              <find_crate_slot name="$tmp" object="$TestShip" multiple="true"/>
-              <set_value name="$output" exact="$output + '\n=&gt;crate_slot count: ' + $tmp.count"/>
-              <find_prop_slot name="$tmp" room="$TestShip" multiple="true"/>
-              <set_value name="$output" exact="$output + '\n=&gt;prop_slot count: ' + $tmp.count"/>
               <find_player_transporter_slot name="$tmp" object="$TestShip" multiple="true"/>
               <set_value name="$output" exact="$output + '\n=&gt;player_transporter_slot count: ' + $tmp.count"/>
               <find_shipworkbench_slot name="$tmp" object="$TestShip" multiple="true"/>
@@ -829,10 +825,8 @@
               <set_value name="$output" exact="$output + '\n=&gt;stationeditor_slot count: ' + $tmp.count"/>
               <find_scenarioconsole_slot name="$tmp" object="$TestShip" multiple="true"/>
               <set_value name="$output" exact="$output + '\n=&gt;scenarioconsole_slot count: ' + $tmp.count"/>
-              <find_connected_macro name="$tmp" macro="$macro" multiple="true"/>
-              <set_value name="$output" exact="$output + '\n=&gt;connected_macro count: ' + $tmp.count"/>
               <run_actions ref="WriteOutputAndHistory">
-                <param name="output" value="'Output File is ' + 'ut_console/' + $macro.id + ' report.txt'"/>
+                <param name="output" value="'Output File is ' + 'logs/ut_console/' + $macro.id + ' report.txt'"/>
                 <param name="type" value="'command_out'"/>
               </run_actions>
               <!--debug_text filter="general" text="$output"/-->
@@ -886,7 +880,6 @@
             <do_if value="(typeof $WarpObject).isnumeric">
               <set_value name="$WarpObject" exact="component.{$WarpObject}"/>
             </do_if>
-            <append_to_list name="$ResultList" exact="$returnValue"/>
             <run_actions ref="EvaluatePropertyFromRoot" result="$DestinationObject">
               <param name="pchain" value="$terms_converted.{3}"/>
               <param name="ListOutput" value="false"/>
@@ -1963,7 +1956,7 @@ player. => currently implemented as kind of global properties - have to improve 
               </run_actions>
               <set_value name="$resultValue" exact="$PropertyValue.distanceto.{$tmp}"/>
               <set_value name="$properties_to_remove" exact="2"/>
-              <remove_value value="$tmp"/>
+              <remove_value name="$tmp"/>
             </do_elseif>
             <!-- How it was generated: first filter the scriptproperties.xml with this XPath:
 //property[not(contains(@name, '.')) and not(contains(@name, '<')) and not(contains(@name, '{')) and not(contains(@name, '@'))]/@name
@@ -5357,8 +5350,8 @@ attribute	name	set_object_velocity
           </conditions>
           <actions>
             <set_value name="$search_term" exact="@event.param3.$terms.{2}" comment="could also be just the number of commands to repeat"/>
-            <set_value name="$repeat_count" exact="if $search_term.isnumeric then event.param3.$terms.{2} else 20"/>
-            <set_value name="$search_term" exact="null" chance="$search_term.isnumeric * 100"/>
+            <set_value name="$repeat_count" exact="if (typeof $search_term).isnumeric then $search_term else 20"/>
+            <set_value name="$search_term" exact="null" chance="(typeof $search_term).isnumeric * 100"/>
             <set_value name="$output_list" exact="[]"/>
             <set_value name="$output_type" exact="[]"/>
             <do_all exact="$his_text.count" counter="$i" reverse="true">
@@ -5392,10 +5385,10 @@ attribute	name	set_object_velocity
               <raise_lua_event name="'Chat_Window_API.Print'" param="'h \033R'+$output_list.{$i}"/>
             </do_elseif>
             <do_elseif value="$output_type.{$i} == 'command_out'">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="h $output_list.{$i}"/>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="'h ' + $output_list.{$i}"/>
             </do_elseif>
             <do_elseif value="$output_type.{$i} == 'debug_out' and  Root.$debugmode">
-              <raise_lua_event name="'Chat_Window_API.Print'" param="h '\033G'+$output_list.{$i}"/>
+              <raise_lua_event name="'Chat_Window_API.Print'" param="h \033G'+$output_list.{$i}"/>
             </do_elseif>
             <do_elseif value="$output_type.{$i} == 'help_out'">
               <raise_lua_event name="'Chat_Window_API.Print'" param="'h \033W'+$output_list.{$i}"/>
