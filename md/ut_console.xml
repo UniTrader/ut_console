@@ -22,6 +22,7 @@
             <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'unlock'"/>
           </conditions>
           <actions>
+            <cancel_cue cue="ConsoleNotUnlockedYet"/>
             <run_actions ref="WriteOutputAndHistory">
               <param name="output" value="{5554401,1}+'unlock - All Console Commands unlocked! This includes the Commands that can break your game!\nIf you use them your Save will be marked accordingly. There will be no further Warnings!'"/>
               <param name="type" value="'command_hot'"/>
@@ -283,6 +284,22 @@
             </cue>
           </cues>
         </cue>
+        <cue name="ConsoleNotUnlockedYet" instantiate="true">
+          <conditions>
+            <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+            <check_any>
+              <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'setval'"/>
+              <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'cue'"/>
+              <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'destroy'"/>
+            </check_any>
+          </conditions>
+          <actions>
+            <run_actions ref="WriteOutputAndHistory">
+              <param name="output" value="event.param3.$terms.{1} + ' - Full console not unlocked yet - command unavailable'"/>
+              <param name="type" value="'help_out'"/>
+            </run_actions>
+          </actions>
+        </cue>
         <cue name="ShowMarker" instantiate="true">
           <conditions>
             <check_any>
@@ -445,10 +462,17 @@
               </run_actions>
               <append_to_list name="$ResultList" exact="$returnValue"/>
               <do_if value="$ListOutput == false">
+                <set_value name="$tmp_out" exact="($i-1)+') '+$terms.{$i}"/>
+                <do_all exact="$i-2" reverse="true" counter="$j"><!-- -1 for the command itself, which is skipped; -1 for that being the current property chain -->
+                  <substitute_text text="$tmp_out">
+                    <replace string="'R.'+$j" with="$terms.{$j+1}"/>
+                  </substitute_text>
+                </do_all>
                 <run_actions ref="WriteOutputAndHistory">
-                  <param name="output" value="$terms.{$i} + ' =&gt; ' + $returnValue + if $terms_converted.{$i}.count then $terms_converted.{$i} else ''"/>
+                  <param name="output" value="$tmp_out + ' =&gt; ' + $returnValue + if $terms_converted.{$i}.count then $terms_converted.{$i} else ''"/>
                   <param name="type" value="'command_out'"/>
                 </run_actions>
+                <remove_value name="$tmp_out"/>
               </do_if>
               <do_else>
                 <run_actions ref="WriteOutputAndHistory">
