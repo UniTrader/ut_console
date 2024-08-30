@@ -234,7 +234,7 @@
                     </do_else>
                     <run_actions ref="WriteOutputAndHistory">
                       <param name="output" value="'Destroy %s // %s? Type in %s to confirm. Any other Input will abort without further feedback.'.[$object.knownname,$object.idcode,$confirmcodes]"/>
-                      <param name="type" value="'command_out'"/>
+                      <param name="type" value="'command_hot'"/>
                     </run_actions>
                   </do_if>
                   <do_else>
