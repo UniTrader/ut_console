@@ -1954,6 +1954,15 @@ player. => currently implemented as kind of global properties - have to improve 
               <set_value name="$properties_to_remove" exact="2"/>
               <remove_value name="$tmp"/>
             </do_elseif>
+            <!-- Get the current Paingmod/paintjob of a ship -->
+            <do_elseif value="$currentProperty == 'paintmod'">
+              <do_for_each in="lookup.ware.list">
+                <do_if value="loop.element.ispaintmod and $PropertyValue.haspaintmod.{loop.element}">
+                  <set_value name="$resultValue" exact="loop.element"/>
+                  <break/>
+                </do_if>
+              </do_for_each>
+            </do_elseif>
             <!-- How it was generated: first filter the scriptproperties.xml with this XPath:
 //property[not(contains(@name, '.')) and not(contains(@name, '<')) and not(contains(@name, '{')) and not(contains(@name, '@'))]/@name
 and then use libreofice calc to fill in the do_elseif, removing dupes
