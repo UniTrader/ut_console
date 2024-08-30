@@ -254,6 +254,10 @@
                           <signal_cue_instantly cue="ShowMarker" param="3"/>
                           <!--set_object_min_hull object="$object" exact="0"/>
                       <set_object_min_shield object="$object" exact="0"/-->
+                          <run_actions ref="WriteOutputAndHistory">
+                            <param name="output" value="'%s - Destruction confirmed. %s will %s now'.[event.param3.$text,$object.debugname,if $noexplosion then 'plop out of existence' else 'explode' ]"/>
+                            <param name="type" value="'command_out'"/>
+                          </run_actions>
                           <do_if value="$noexplosion">
                             <destroy_object object="$object" explosion="false"/>
                           </do_if>
