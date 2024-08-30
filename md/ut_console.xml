@@ -1883,10 +1883,8 @@ player. => currently implemented as kind of global properties - have to improve 
                 <set_value name="$retval" exact="[]"/>
               </do_if>
               <find_object name="$allobjects" multiple="true" space="player.galaxy" recursive="true"/>
-              <find_object name="$allobjects_add" multiple="true" space="player.galaxy" recursive="true" state="componentstate.construction"/>
-              <append_list_elements name="$allobjects" other="$allobjects_add"/>
-              <find_object name="$allobjects_add" multiple="true" space="player.galaxy" recursive="true" state="componentstate.wreck"/>
-              <append_list_elements name="$allobjects" other="$allobjects_add"/>
+              <find_object name="$allobjects_add" append="true" multiple="true" space="player.galaxy" recursive="true" state="componentstate.construction"/>
+              <find_object name="$allobjects_add" append="true" multiple="true" space="player.galaxy" recursive="true" state="componentstate.wreck"/>
               <do_for_each in="$allobjects" name="$object">
                 <do_if value="$term" exact="$object.idcode">
                   <do_if value="$multiple">
