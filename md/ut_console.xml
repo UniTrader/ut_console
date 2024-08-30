@@ -1867,6 +1867,9 @@ player. => currently implemented as kind of global properties - have to improve 
             <do_elseif value="$term" exact="'pobject'" comment="player container (ship or station)">
               <set_value name="$retval" exact="player.container"/>
             </do_elseif>
+            <do_elseif value="$term" exact="'pconvactor'" comment="player container (ship or station)">
+              <set_value name="$retval" exact="player.conversationactor"/>
+            </do_elseif>
             <do_elseif value="$term == 'htargets' and $multiple" comment="Holomap Targets (Ignore; the event will repeat for every single target)">
               <set_value name="$retval" exact="player.holomap.targets"/>
             </do_elseif>
