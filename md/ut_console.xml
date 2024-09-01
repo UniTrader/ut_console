@@ -81,7 +81,7 @@
                     <replace string="'$'" with="''"/>
                   </substitute_text>
                   <set_value name="$test2" exact="'$' + $test"/>
-                  <do_if value="($test != $SetProperty and $test2 == $SetProperty) or (( typeof $SetValue ).indexof.{[datatype.list,datatype.table,datatype.cue,datatype.entity]} and (typeof $SetProperty).isnumeric)">
+                  <do_if value="($test != $SetProperty and $test2 == $SetProperty) or (( typeof $SetValue ).indexof.{[datatype.list,datatype.table]} and (typeof $SetProperty).isnumeric)">
                     <!-- property is a Var in a Table, Cue or blackboard, or an index number for a List or Table - try to directly set it (method is the same for all cases) -->
                     <set_value name="$SetValue.{$SetProperty}" exact="$GetValue"/>
                     <set_value name="$FinalValue" exact="$SetValue.{$SetProperty}"/>
@@ -130,7 +130,7 @@
                 <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'cue'"/>
               </conditions>
               <actions>
-                <set_value name="$cmd_lvl" exact="if $terms.{2} == 'state' then 1 else 3"/>
+                <set_value name="$cmd_lvl" exact="if event.param3.$terms.{2} == 'state' then 1 else 3"/>
                 <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'info [h(elp)] $action$ $cue$\nCan force Cues into certain states. possible actions:\nstate: returns the cue state (harmless, but prefer eval for this)\ncancel: cancels the cue and its sub-cues\nreset: resets the cue and its sub-cues\ncomplete: marks the cue as completed\nforce: will force a cue to trigger\nsignal: signals the cue; if there is another param it will signal instantly with that.'"/>
                 <include_actions ref="PrintHelpAndUnpackTerms"/>
                 <!-- get cue -->
@@ -1944,7 +1944,7 @@ player. => currently implemented as kind of global properties - have to improve 
               <replace string="'$'" with="''"/>
             </substitute_text>
             <set_value name="$test2" exact="'$' + $test"/>
-            <do_if value="($test != $Property and $test2 == $Property) or (( typeof $SetValue ).indexof.[datatype.list,datatype.table] and (typeof $SetProperty).isnumeric)">
+            <do_if value="($test != $Property and $test2 == $Property) or (( typeof $SetValue ).indexof.{[datatype.list,datatype.table]} and (typeof $SetProperty).isnumeric)">
               <!-- property starts with $ - Interpret as Table Value/Entry for now (working on Console Vars later ...) -->
               <set_value name="$isvariable"/>
             </do_if>
