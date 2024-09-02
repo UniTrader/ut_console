@@ -206,9 +206,10 @@
                 <set_value name="$cmd_lvl" exact="1"/>
                 <set_value name="$helpstring" exact="'Input: '+{5554401,1}+'info [h(elp)] $object$\nDestroys the Target Object after confirmation. Stricter Confirmation requirement if Target Object is invulnearable.'"/>
                 <include_actions ref="PrintHelpAndUnpackTerms"/>
+                <set_value name="$method" exact="'explosion'"/>
                 <do_if value="$terms.count ge 2">
                   <do_if value="$terms.indexof.{'noexplosion'}">
-                    <set_value name="$explosion" exact="false"/>
+                    <set_value name="$method" exact="'noexplosion'"/>
                     <remove_value name="$terms.{$terms.indexof.{'noexplosion'}}"/>
                   </do_if>
                   <do_else>
@@ -233,8 +234,8 @@
                       <set_value name="$confirmcodes" exact="['y','Y','yes','YES']"/>
                     </do_else>
                     <run_actions ref="WriteOutputAndHistory">
-                      <param name="output" value="'Destroy %s // %s? Type in %s to confirm. Any other Input will abort without further feedback.'.[$object.knownname,$object.idcode,$confirmcodes]"/>
-                      <param name="type" value="'command_hot'"/>
+                      <param name="output" value="'Destroy %s // %s? Type in %s to confirm.\nAny other Input will abort.'.[$object.knownname,$object.idcode,$confirmcodes]"/>
+                      <param name="type" value="if $confirmcodes.count gt 1 then 'command_out' else 'command_hot'"/>
                     </run_actions>
                   </do_if>
                   <do_else>
@@ -255,33 +256,61 @@
                           <!--set_object_min_hull object="$object" exact="0"/>
                       <set_object_min_shield object="$object" exact="0"/-->
                           <run_actions ref="WriteOutputAndHistory">
-                            <param name="output" value="'%s - Destruction confirmed. %s will %s now'.[event.param3.$text,$object.debugname,if $noexplosion then 'plop out of existence' else 'explode' ]"/>
+                            <param name="output" value="event.param3.$text"/>
+                            <param name="type" value="'command'"/>
+                          </run_actions>
+                          <run_actions ref="WriteOutputAndHistory">
+                            <param name="output" value="'Destruction confirmed. %s\nwill be destroyed with %s now'.[$object.debugname,$method ]"/>
                             <param name="type" value="'command_out'"/>
                           </run_actions>
-                          <do_if value="$noexplosion">
-                            <destroy_object object="$object" explosion="false"/>
+                          <do_if value="$method == 'explosion'">
+                            <destroy_object object="$object" explosion="true"/>
                           </do_if>
+                          <do_elseif value="$method == 'noexplosion'">
+                            <destroy_object object="$object" explosion="false"/>
+                          </do_elseif>
                           <do_else>
                             <destroy_object object="$object" explosion="true"/>
                           </do_else>
                         </do_if>
                         <do_else>
                           <run_actions ref="WriteOutputAndHistory">
-                            <param name="output" value="'Target gained invulnearability or player entered it since destroy command was issued - repeat command!'"/>
+                            <param name="output" value="'Target gained invulnearability or player entered it since destroy command was issued\n -&lt; repeat command!'"/>
                             <param name="type" value="'command_out'"/>
                           </run_actions>
                         </do_else>
                       </do_if>
                       <do_else>
+                        <run_actions ref="WriteOutputAndHistory">
+                          <param name="output" value="event.param3.$text"/>
+                          <param name="type" value="'command'"/>
+                        </run_actions>
+                        <run_actions ref="WriteOutputAndHistory">
+                          <param name="output" value="'Destruction confirmed. %s \nwill be destroyed with %s now'.[$object.debugname,$method ]"/>
+                          <param name="type" value="'command_out'"/>
+                        </run_actions>
                         <signal_cue_instantly cue="ShowMarker" param="2"/>
-                        <do_if value="$noexplosion">
-                          <destroy_object object="$object" explosion="false"/>
+                        <do_if value="$method == 'explosion'">
+                          <destroy_object object="$object" explosion="true"/>
                         </do_if>
+                        <do_elseif value="$method == 'noexplosion'">
+                          <destroy_object object="$object" explosion="false"/>
+                        </do_elseif>
                         <do_else>
                           <destroy_object object="$object" explosion="true"/>
                         </do_else>
                       </do_else>
                     </do_if>
+                    <do_else>
+                      <run_actions ref="WriteOutputAndHistory">
+                        <param name="output" value="event.param3.$text"/>
+                        <param name="type" value="'command'"/>
+                      </run_actions>
+                      <run_actions ref="WriteOutputAndHistory">
+                        <param name="output" value="'Destruction of %s aborted'.[$object.debugname]"/>
+                        <param name="type" value="'command_out'"/>
+                      </run_actions>
+                    </do_else>
                   </actions>
                 </cue>
               </cues>
