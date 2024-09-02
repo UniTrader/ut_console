@@ -1061,7 +1061,8 @@
                   <event_npc_walk_finished object="$Object"/>
                   <event_npc_slots_validated object="$Object"/>
                   <event_masstraffic_ship_removed object="$Object"/>
-                  <event_gravidar_has_scanned object="$Object"/>
+                  <!-- disabled - FAR too Spammy -->
+                  <!--event_gravidar_has_scanned object="$Object"/-->
                   <event_alert_level_changed object="$Object"/>
                   <event_traffic_level_changed object="$Object"/>
                   <event_detached_from_masstraffic object="$Object"/>
