@@ -5478,7 +5478,9 @@ attribute	name	set_object_velocity
           <actions>
             <append_to_list name="CommandHistory.$his_text" exact="$output"/>
             <append_to_list name="CommandHistory.$his_type" exact="$type"/>
-            <debug_to_file name="'console_out.txt'" directory="'ut_console'" text="$output"/>
+            <do_if value="if $type == 'debug_out' then Root.$debugmode else true">
+              <debug_to_file name="'console_out.txt'" directory="'ut_console'" text="$output"/>
+            </do_if>
             <!-- the color code is to make obvious this output was actually logged, rather than the old method to just output directly to the chat window - but thats transitional till its fully migrated -->
             <do_if value="$type == 'command'">
               <raise_lua_event name="'Chat_Window_API.Print'" param="'\033Y'+$output"/>
