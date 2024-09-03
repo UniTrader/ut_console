@@ -1454,8 +1454,8 @@ player. => currently implemented as kind of global properties - have to improve 
               </do_if>
             </do_elseif>
             <do_elseif value="$root_term" exact="'global'" comment="read a global var as start param - getting info from first two properties">
-              <set_value name="$returnValue" exact="global.{$pchain.{2}}"/>
-              <do_if value="$returnValue.exists">
+              <do_if value="global.{$pchain.{2}}?">
+                <set_value name="$returnValue" exact="global.{$pchain.{2}}"/>
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
                 <return value="$returnValue"/>
@@ -1476,10 +1476,12 @@ player. => currently implemented as kind of global properties - have to improve 
               <return value="$returnValue"/>
             </do_elseif>
             <do_elseif value="$root_term" exact="'ware'" comment="getting a ware  - using first 2 properties">
-              <set_value name="$returnValue" exact="ware.{$pchain.{2}}"/>
-              <remove_value name="$pchain.{1}"/>
-              <remove_value name="$pchain.{1}"/>
-              <return value="$returnValue"/>
+              <do_if value="ware.{$pchain.{2}}?">
+                <set_value name="$returnValue" exact="ware.{$pchain.{2}}"/>
+                <remove_value name="$pchain.{1}"/>
+                <remove_value name="$pchain.{1}"/>
+                <return value="$returnValue"/>
+              </do_if>
             </do_elseif>
             <do_elseif value="$root_term" exact="'R'" comment="Re-using previous Result -  using first 2 properties">
               <do_if value="Root.$ResultList.{$pchain.{2}}?">
