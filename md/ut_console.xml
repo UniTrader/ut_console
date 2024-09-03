@@ -9,7 +9,7 @@
   <cues>
     <cue name="Root">
       <actions>
-        <set_value name="$secretvalue" exact="'You will never see this!!!'" comment="test value for the eval md command"/>
+        <set_value name="$secretvalue" exact="'You will never see this!!!'" comment="test value for the eval console command"/>
         <set_value name="$debugmode" exact="false"/>
         <!-- NOTE: Console internal Vars start AND End with $ to differ them from other Vars that will be referenced -->
         <set_value name="$console_vars" exact="table[]"/>
@@ -1359,9 +1359,17 @@
               <param name="returnAsIs" value="true"/>
             </run_actions>
             <do_if value="@$returnValue.exists">
+              <run_actions ref="WriteOutputAndHistory">
+                <param name="output" value="'Found an Object as Root Property:' + $returnValue.debugname"/>
+                <param name="type" value="'debug_out'"/>
+              </run_actions>
               <remove_value name="$pchain.{1}"/>
               <return value="$returnValue"/>
             </do_if>
+            <run_actions ref="WriteOutputAndHistory">
+              <param name="output" value="'Reading Root Term:' + $root_term"/>
+              <param name="type" value="'debug_out'"/>
+            </run_actions>
             <!-- 
 Skipping: the following root properties for now (and reasoning):
 player. => currently implemented as kind of global properties - have to improve on that. also maybe not call this for them.
@@ -1434,8 +1442,12 @@ player. => currently implemented as kind of global properties - have to improve 
               </do_if>
             </do_elseif>
             <do_elseif value="$root_term" exact="'mdvar'" comment="read a md global var as start param - getting info from first two properties">
-              <set_value name="$returnValue" exact="md.{$pchain.{2}}"/>
-              <do_if value="$returnValue.exists">
+              <run_actions ref="WriteOutputAndHistory">
+                <param name="output" value="'trying to read  mdvar:' + $pchain.{1} + '.' + $pchain.{2} + ' =&gt; ' + md.{$pchain.{2}}"/>
+                <param name="type" value="'debug_out'"/>
+              </run_actions>
+              <do_if value="md.{$pchain.{2}}?">
+                <set_value name="$returnValue" exact="md.{$pchain.{2}}"/>
                 <remove_value name="$pchain.{1}"/>
                 <remove_value name="$pchain.{1}"/>
                 <return value="$returnValue"/>
