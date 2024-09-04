@@ -315,6 +315,77 @@
                 </cue>
               </cues>
             </cue>
+            <cue name="MDCommands" comment="Direct calls to MD/Common Commands, without additional checks">
+              <cues>
+                <!-- Template to Copy - fill in the Command name in: 1)Cue Name 2)check_value/command call  3)actions after getting the input
+                <cue name="" instantiate="true" namespace="this">
+                  <conditions>
+                    <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+                    <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+''"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$cmd_lvl" exact="3"/>
+                    <set_value name="$helpstring" exact="'No help Entry. refer to the xsds.'"/>
+                    <include_actions ref="PrintHelpAndUnpackTerms"/>
+                    <set_value name="$Value" exact="[]"/>
+                    <do_for_each in="$terms_converted" counter="$i">
+                      <do_if value="$i == 1">
+                        <continue/>
+                      </do_if>
+                      <run_actions ref="EvaluatePropertyFromRoot" result="$Value.{$i-1}">
+                        <param name="pchain" value="$terms_converted.{$i}"/>
+                        <param name="ListOutput" value="false"/>
+                      </run_actions>
+                    </do_for_each>
+                  </actions>
+                </cue>
+                -->
+                <cue name="Set_build_plot" instantiate="true" namespace="this">
+                  <conditions>
+                    <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+                    <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'set_build_plot'"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$cmd_lvl" exact="3"/>
+                    <set_value name="$helpstring" exact="'No help Entry. refer to the xsds.'"/>
+                    <include_actions ref="PrintHelpAndUnpackTerms"/>
+                    <set_value name="$Value" exact="[]"/>
+                    <do_for_each in="$terms_converted" counter="$i">
+                      <do_if value="$i == 1">
+                        <continue/>
+                      </do_if>
+                      <run_actions ref="EvaluatePropertyFromRoot" result="$Value.{$i-1}">
+                        <param name="pchain" value="$terms_converted.{$i}"/>
+                        <param name="ListOutput" value="false"/>
+                      </run_actions>
+                    </do_for_each>
+                    <set_build_plot object="$Value.{1}" x="$Value.{2}" y="$Value.{3}" z="$Value.{4}" allowreduction="true"/>
+                  </actions>
+                </cue>
+                <cue name="Extend_build_plot" instantiate="true" namespace="this">
+                  <conditions>
+                    <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
+                    <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'extend_build_plot'"/>
+                  </conditions>
+                  <actions>
+                    <set_value name="$cmd_lvl" exact="3"/>
+                    <set_value name="$helpstring" exact="'No help Entry. refer to the xsds.'"/>
+                    <include_actions ref="PrintHelpAndUnpackTerms"/>
+                    <set_value name="$Value" exact="[]"/>
+                    <do_for_each in="$terms_converted" counter="$i">
+                      <do_if value="$i == 1">
+                        <continue/>
+                      </do_if>
+                      <run_actions ref="EvaluatePropertyFromRoot" result="$Value.{$i-1}">
+                        <param name="pchain" value="$terms_converted.{$i}"/>
+                        <param name="ListOutput" value="false"/>
+                      </run_actions>
+                    </do_for_each>
+                    <extend_build_plot object="$Value.{1}" posx="$Value.{2}" posy="$Value.{3}" posz="$Value.{4}" negx="$Value.{5}" negy="$Value.{6}" negz="$Value.{7}" allowreduction="true"/>
+                  </actions>
+                </cue>
+              </cues>
+            </cue>
           </cues>
         </cue>
         <cue name="ConsoleNotUnlockedYet" instantiate="true">
