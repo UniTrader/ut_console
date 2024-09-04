@@ -332,10 +332,11 @@
                       <do_if value="$i == 1">
                         <continue/>
                       </do_if>
-                      <run_actions ref="EvaluatePropertyFromRoot" result="$Value.{$i-1}">
+                      <run_actions ref="EvaluatePropertyFromRoot" result="$tmp">
                         <param name="pchain" value="$terms_converted.{$i}"/>
                         <param name="ListOutput" value="false"/>
                       </run_actions>
+                      <append_to_list name="$Value" exact="$tmp"/>
                     </do_for_each>
                   </actions>
                 </cue>
@@ -347,43 +348,45 @@
                   </conditions>
                   <actions>
                     <set_value name="$cmd_lvl" exact="3"/>
-                    <set_value name="$helpstring" exact="'No help Entry. refer to the xsds.'"/>
+                    <set_value name="$helpstring" exact="'No help Entry. refer to the xsds and the script code.'"/>
                     <include_actions ref="PrintHelpAndUnpackTerms"/>
                     <set_value name="$Value" exact="[]"/>
                     <do_for_each in="$terms_converted" counter="$i">
                       <do_if value="$i == 1">
                         <continue/>
                       </do_if>
-                      <run_actions ref="EvaluatePropertyFromRoot" result="$Value.{$i-1}">
+                      <run_actions ref="EvaluatePropertyFromRoot" result="$tmp">
                         <param name="pchain" value="$terms_converted.{$i}"/>
                         <param name="ListOutput" value="false"/>
                       </run_actions>
+                      <append_to_list name="$Value" exact="$tmp"/>
                     </do_for_each>
                     <set_build_plot object="$Value.{1}" x="$Value.{2}" y="$Value.{3}" z="$Value.{4}" allowreduction="true"/>
                   </actions>
                 </cue>
-                <cue name="Extend_build_plot" instantiate="true" namespace="this">
+                <!--cue name="Extend_build_plot" instantiate="true" namespace="this"> CRASHES GAME!
                   <conditions>
                     <event_ui_triggered screen="'Chat_Window_API'" control="'text_entered'"/>
                     <check_value value="event.param3.$terms.{1}" exact="{5554401,1}+'extend_build_plot'"/>
                   </conditions>
                   <actions>
                     <set_value name="$cmd_lvl" exact="3"/>
-                    <set_value name="$helpstring" exact="'No help Entry. refer to the xsds.'"/>
+                    <set_value name="$helpstring" exact="'No help Entry. refer to the xsds and the script code.'"/>
                     <include_actions ref="PrintHelpAndUnpackTerms"/>
                     <set_value name="$Value" exact="[]"/>
                     <do_for_each in="$terms_converted" counter="$i">
                       <do_if value="$i == 1">
                         <continue/>
                       </do_if>
-                      <run_actions ref="EvaluatePropertyFromRoot" result="$Value.{$i-1}">
+                      <run_actions ref="EvaluatePropertyFromRoot" result="$tmp">
                         <param name="pchain" value="$terms_converted.{$i}"/>
                         <param name="ListOutput" value="false"/>
                       </run_actions>
+                      <append_to_list name="$Value" exact="$tmp"/>
                     </do_for_each>
                     <extend_build_plot object="$Value.{1}" posx="$Value.{2}" posy="$Value.{3}" posz="$Value.{4}" negx="$Value.{5}" negy="$Value.{6}" negz="$Value.{7}" allowreduction="true"/>
                   </actions>
-                </cue>
+                </cue-->
               </cues>
             </cue>
           </cues>
